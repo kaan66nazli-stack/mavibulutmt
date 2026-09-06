@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metropol Towers | Artisan Bakery & Gourmet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-card { background: #18181b; border: 1px solid #27272a; }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen pb-24">
+
+    <header class="sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800 px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 font-bold">
+                <i class="fa-solid fa-wheat-awn text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-sm md:text-base tracking-wide text-zinc-100 leading-tight">METROPOL BAKE</h1>
+                <p class="text-[10px] text-amber-500 font-medium tracking-widest">TOWERS SPECIAL</p>
+            </div>
+        </div>
+        <button onclick="openAdminModal()" class="text-xs text-zinc-400 hover:text-amber-500 transition-all bg-zinc-900 border border-zinc-800 px-3 py-2 rounded-lg flex items-center gap-2">
+            <i class="fa-solid fa-lock"></i>
+            <span>Yönetici</span>
+        </button>
+    </header>
+
+    <div id="closed-banner" class="hidden bg-red-500/10 border-b border-red-500/20 p-3 text-center">
+        <p class="text-red-400 font-bold text-xs md:text-sm flex items-center justify-center gap-2">
+            <i class="fa-solid fa-store-slash"></i> Mağazamız Şu An Hizmete Kapalıdır. Sipariş Alınmamaktadır.
+        </p>
+    </div>
+
+    <section class="p-4 max-w-4xl mx-auto">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-950/40 to-zinc-900 border border-amber-500/20 p-5">
+            <span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] px-2.5 py-1 rounded-full font-semibold inline-block mb-2">
+                <i class="fa-solid fa-fire mr-1"></i> Site Sakinlerine Özel
+            </span>
+            <h2 class="text-xl md:text-2xl font-bold text-amber-100">Dairenize Sıcak Teslimat</h2>
+            <p class="text-zinc-400 text-xs mt-1">Günlük taze çıkan ürünler kapınızda.</p>
+        </div>
+    </section>
+
+    <main class="max-w-4xl mx-auto px-4">
+        <h3 class="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Günün Ürünleri</h3>
+        <div id="product-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+    </main>
+
+    <div id="cart-bar" class="fixed bottom-4 left-4 right-4 max-w-md mx-auto bg-amber-500 text-zinc-950 p-3.5 rounded-2xl shadow-2xl flex justify-between items-center z-30 transition-all duration-300 transform translate-y-32">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-zinc-950/10 rounded-xl flex items-center justify-center font-bold text-sm" id="cart-count">0</div>
+            <div>
+                <p class="text-[10px] font-semibold opacity-80">Toplam Tutar</p>
+                <p class="text-base font-bold" id="cart-total">0 ₺</p>
+            </div>
+        </div>
+        <button onclick="openCheckoutModal()" class="bg-zinc-950 text-amber-400 px-4 py-2 rounded-xl font-bold text-xs hover:bg-zinc-900 transition-all flex items-center gap-2">
+            <span>Siparişi Tamamla</span>
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <div id="checkout-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex justify-center items-end sm:items-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-5">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-base font-bold text-zinc-100">Teslimat Detayları</h3>
+                <button onclick="closeCheckoutModal()" class="text-zinc-500 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <form id="order-form" onsubmit="submitOrder(event)" class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[11px] text-zinc-400 block mb-1">Blok Seçin</label>
+                        <select id="block-select" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-xs text-zinc-200 focus:border-amber-500 outline-none">
+                            <option value="">Seçiniz</option>
+                            <option value="D Blok">D Blok</option>
+                            <option value="E Blok">E Blok</option>
+                            <option value="F Blok">F Blok</option>
+                            <option value="G Blok">G Blok</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[11px] text-zinc-400 block mb-1">Daire No (Maks 11)</label>
+                        <input type="number" id="flat-input" min="1" max="11" placeholder="Örn: 5" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-xs text-zinc-200 focus:border-amber-500 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[11px] text-zinc-400 block mb-1">Ödeme Yöntemi</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="border border-zinc-800 bg-zinc-950 p-2.5 rounded-xl flex items-center gap-2 cursor-pointer hover:border-amber-500/50">
+                            <input type="radio" name="payment" value="Nakit" checked class="accent-amber-500">
+                            <span class="text-xs text-zinc-300">Kapıda Nakit</span>
+                        </label>
+                        <label class="border border-zinc-800 bg-zinc-950 p-2.5 rounded-xl flex items-center gap-2 cursor-pointer hover:border-amber-500/50">
+                            <input type="radio" name="payment" value="IBAN" class="accent-amber-500">
+                            <span class="text-xs text-zinc-300">IBAN / Havale</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-amber-500 text-zinc-950 py-3 rounded-xl font-bold text-xs hover:bg-amber-400 transition-all">
+                        Siparişi Onayla
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="admin-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-lg p-5 max-h-[90vh] overflow-y-auto">
+            <div id="admin-login" class="space-y-3">
+                <h3 class="text-base font-bold text-zinc-100">Yönetici Girişi</h3>
+                <input type="password" id="admin-code" placeholder="Erişim Kodunu Girin" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-xs text-zinc-200 focus:border-amber-500 outline-none">
+                <div class="flex gap-2">
+                    <button onclick="closeAdminModal()" class="w-1/2 bg-zinc-800 text-zinc-400 py-2 rounded-xl text-xs">İptal</button>
+                    <button onclick="verifyAdmin()" class="w-1/2 bg-amber-500 text-zinc-950 font-bold py-2 rounded-xl text-xs">Giriş Yap</button>
+                </div>
+            </div>
+
+            <div id="admin-panel" class="hidden space-y-4">
+                <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
+                    <h3 class="text-base font-bold text-amber-500">Yönetim Paneli</h3>
+                    <button onclick="closeAdminModal()" class="text-zinc-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <p class="font-bold text-xs text-amber-500"><i class="fa-solid fa-bell mr-1"></i> Gelen Siparişler</p>
+                        <button onclick="clearOrders()" class="text-[10px] text-red-400 hover:underline">Tümünü Temizle</button>
+                    </div>
+                    <div id="admin-orders-list" class="space-y-2 max-h-40 overflow-y-auto pr-1"></div>
+                </div>
+
+                <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 flex justify-between items-center">
+                    <div>
+                        <p class="font-bold text-xs text-zinc-200">Mağaza Durumu</p>
+                        <p class="text-[10px] text-zinc-500" id="store-status-text">Mağaza Açık</p>
+                    </div>
+                    <button id="store-toggle-btn" onclick="toggleStoreStatus()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-green-500 text-zinc-950">
+                        AÇIK
+                    </button>
+                </div>
+
+                <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 space-y-2">
+                    <p class="font-bold text-xs text-amber-500">Yeni Ürün Ekle</p>
+                    <input type="text" id="new-p-name" placeholder="Ürün Adı" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-xs text-zinc-200">
+                    <div class="grid grid-cols-3 gap-2">
+                        <input type="number" id="new-p-price" placeholder="Fiyat (₺)" class="bg-zinc-900 border border-zinc-800 rounded p-2 text-xs text-zinc-200">
+                        <input type="number" id="new-p-stock" placeholder="Stok" class="bg-zinc-900 border border-zinc-800 rounded p-2 text-xs text-zinc-200">
+                        <input type="number" id="new-p-limit" placeholder="Limit (0=Sınırsız)" class="bg-zinc-900 border border-zinc-800 rounded p-2 text-xs text-zinc-200">
+                    </div>
+                    <input type="text" id="new-p-tag" placeholder="Etiket (Örn: Fırından Yeni Çıktı)" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-xs text-zinc-200">
+                    <button onclick="addNewProduct()" class="w-full bg-amber-500 text-zinc-950 font-bold py-2 rounded text-xs hover:bg-amber-400">Ürünü Ekle</button>
+                </div>
+
+                <div>
+                    <p class="font-bold text-xs text-zinc-300 mb-2">Mevcut Ürünler</p>
+                    <div id="admin-products" class="space-y-2 max-h-40 overflow-y-auto pr-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isStoreOpen = true;
+
+        let products = [
+            { id: 'ekmek', name: 'Taze Ekmek', price: 15, stock: 50, limit: Infinity, tag: 'Fırından Yeni Çıktı' },
+            { id: 'kurabiye', name: 'Tereyağlı Kurabiye', price: 60, stock: 15, limit: 3, tag: 'Çok Satan' },
+            { id: 'cikolata', name: 'Gurme Çikolata', price: 95, stock: 10, limit: 3, tag: 'El Yapımı' }
+        ];
+
+        let cart = {};
+        let orders = JSON.parse(localStorage.getItem('mb_orders')) || [];
+
+        function renderProducts() {
+            const container = document.getElementById('product-list');
+            container.innerHTML = '';
+            
+            products.forEach(p => {
+                const qty = cart[p.id] || 0;
+                container.innerHTML += `
+                    <div class="glass-card rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden group hover:border-amber-500/40 transition-all ${!isStoreOpen ? 'opacity-50 pointer-events-none' : ''}">
+                        ${p.tag ? `<span class="absolute top-2.5 right-2.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">${p.tag}</span>` : ''}
+                        
+                        <div>
+                            <h4 class="font-bold text-base text-zinc-100">${p.name}</h4>
+                            <p class="text-amber-500 font-bold text-lg mt-0.5">${p.price} ₺</p>
+                            <p class="text-[11px] text-zinc-500 mt-1">Stok: ${p.stock} | Limit: ${p.limit === Infinity ? 'Sınırsız' : p.limit + ' Adet'}</p>
+                        </div>
+
+                        <div class="mt-4 flex items-center justify-between gap-2">
+                            <button onclick="updateCart('${p.id}', -1)" class="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-zinc-300 hover:bg-zinc-700">-</button>
+                            <span class="font-bold text-sm text-zinc-100">${qty}</span>
+                            <button onclick="updateCart('${p.id}', 1)" class="w-8 h-8 rounded-lg bg-amber-500 text-zinc-950 flex items-center justify-center font-bold hover:bg-amber-400">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+            updateCartBar();
+        }
+
+        function toggleStoreStatus() {
+            isStoreOpen = !isStoreOpen;
+            const btn = document.getElementById('store-toggle-btn');
+            const txt = document.getElementById('store-status-text');
+            const banner = document.getElementById('closed-banner');
+
+            if (isStoreOpen) {
+                btn.innerText = 'AÇIK';
+                btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-green-500 text-zinc-950';
+                txt.innerText = 'Mağaza Açık';
+                banner.classList.add('hidden');
+            } else {
+                btn.innerText = 'KAPALI';
+                btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-red-500 text-white';
+                txt.innerText = 'Mağaza Kapalı';
+                banner.classList.remove('hidden');
+                cart = {};
+            }
+            renderProducts();
+        }
+
+        function addNewProduct() {
+            const name = document.getElementById('new-p-name').value;
+            const price = parseFloat(document.getElementById('new-p-price').value);
+            const stock = parseInt(document.getElementById('new-p-stock').value);
+            const limitInput = parseInt(document.getElementById('new-p-limit').value);
+            const tag = document.getElementById('new-p-tag').value;
+
+            if (!name || isNaN(price) || isNaN(stock)) {
+                alert('Lütfen ürün adı, fiyat ve stok alanlarını doldurun.');
+                return;
+            }
+
+            const limit = (isNaN(limitInput) || limitInput === 0) ? Infinity : limitInput;
+            const id = 'prod_' + Date.now();
+
+            products.push({ id, name, price, stock, limit, tag });
+
+            document.getElementById('new-p-name').value = '';
+            document.getElementById('new-p-price').value = '';
+            document.getElementById('new-p-stock').value = '';
+            document.getElementById('new-p-limit').value = '';
+            document.getElementById('new-p-tag').value = '';
+
+            renderProducts();
+            renderAdminProducts();
+            alert('Yeni ürün eklendi!');
+        }
+
+        function updateCart(id, change) {
+            if (!isStoreOpen) {
+                alert('Mağaza kapalıdır.');
+                return;
+            }
+
+            const p = products.find(x => x.id === id);
+            const current = cart[id] || 0;
+            const next = current + change;
+
+            if (next < 0) return;
+            if (next > p.limit) {
+                alert(`Bu üründen en fazla ${p.limit} adet ekleyebilirsiniz.`);
+                return;
+            }
+            if (next > p.stock) {
+                alert(`Yetersiz stok! Maksimum stok: ${p.stock}`);
+                return;
+            }
+
+            if (next === 0) delete cart[id];
+            else cart[id] = next;
+
+            renderProducts();
+        }
+
+        function updateCartBar() {
+            const bar = document.getElementById('cart-bar');
+            let totalQty = 0;
+            let totalPrice = 0;
+
+            for (let id in cart) {
+                const p = products.find(x => x.id === id);
+                totalQty += cart[id];
+                totalPrice += cart[id] * p.price;
+            }
+
+            document.getElementById('cart-count').innerText = totalQty;
+            document.getElementById('cart-total').innerText = totalPrice + ' ₺';
+
+            if (totalQty > 0 && isStoreOpen) {
+                bar.classList.remove('translate-y-32');
+            } else {
+                bar.classList.add('translate-y-32');
+            }
+        }
+
+        function openCheckoutModal() { document.getElementById('checkout-modal').classList.remove('hidden'); }
+        function closeCheckoutModal() { document.getElementById('checkout-modal').classList.add('hidden'); }
+
+        function submitOrder(e) {
+            e.preventDefault();
+
+            if (!isStoreOpen) {
+                alert('Mağaza kapalıdır.');
+                return;
+            }
+
+            const block = document.getElementById('block-select').value;
+            const flat = parseInt(document.getElementById('flat-input').value);
+
+            if (flat > 11 || flat < 1) {
+                alert('Daire numarası 1 ile 11 arasında olmalıdır.');
+                return;
+            }
+
+            const payment = document.querySelector('input[name="payment"]:checked').value;
+
+            let items = [];
+            let total = 0;
+            for (let id in cart) {
+                const p = products.find(x => x.id === id);
+                const sum = cart[id] * p.price;
+                total += sum;
+                items.push(`${p.name} (x${cart[id]})`);
+                p.stock -= cart[id];
+            }
+
+            const newOrder = {
+                id: Date.now(),
+                address: `${block}, Daire ${flat}`,
+                payment: payment,
+                items: items.join(', '),
+                total: total,
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            };
+
+            orders.unshift(newOrder);
+            localStorage.setItem('mb_orders', JSON.stringify(orders));
+
+            alert("Siparişiniz Başarıyla Alındı! Dairenize Teslim Edilecektir.");
+
+            cart = {};
+            closeCheckoutModal();
+            renderProducts();
+        }
+
+        function openAdminModal() { document.getElementById('admin-modal').classList.remove('hidden'); }
+        function closeAdminModal() { 
+            document.getElementById('admin-modal').classList.add('hidden');
+            document.getElementById('admin-login').classList.remove('hidden');
+            document.getElementById('admin-panel').classList.add('hidden');
+            document.getElementById('admin-code').value = '';
+        }
+
+        function verifyAdmin() {
+            const code = document.getElementById('admin-code').value;
+            if (code === '160703') {
+                document.getElementById('admin-login').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+                renderAdminProducts();
+                renderAdminOrders();
+            } else {
+                alert('Hatalı Kod!');
+            }
+        }
+
+        function renderAdminOrders() {
+            const container = document.getElementById('admin-orders-list');
+            container.innerHTML = '';
+
+            if (orders.length === 0) {
+                container.innerHTML = `<p class="text-xs text-zinc-500 py-2">Henüz yeni sipariş yok.</p>`;
+                return;
+            }
+
+            orders.forEach(o => {
+                container.innerHTML += `
+                    <div class="bg-zinc-900 p-2.5 rounded-lg border border-zinc-800 text-xs space-y-1">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-amber-400">${o.address}</span>
+                            <span class="text-[10px] text-zinc-500">${o.time}</span>
+                        </div>
+                        <p class="text-zinc-300 text-[11px]">${o.items}</p>
+                        <div class="flex justify-between items-center pt-1 border-t border-zinc-800/50">
+                            <span class="font-bold text-zinc-200">${o.total} TL <span class="text-[10px] font-normal text-zinc-400">(${o.payment})</span></span>
+                            <button onclick="deleteOrder(${o.id})" class="text-[10px] bg-green-500/20 text-green-400 hover:bg-green-500/30 px-2 py-0.5 rounded">Teslim Edildi</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function deleteOrder(orderId) {
+            orders = orders.filter(o => o.id !== orderId);
+            localStorage.setItem('mb_orders', JSON.stringify(orders));
+            renderAdminOrders();
+        }
+
+        function clearOrders() {
+            if (confirm('Tüm sipariş geçmişini silmek istediğinize emin misiniz?')) {
+                orders = [];
+                localStorage.setItem('mb_orders', JSON.stringify(orders));
+                renderAdminOrders();
+            }
+        }
+
+        function renderAdminProducts() {
+            const container = document.getElementById('admin-products');
+            container.innerHTML = '';
+            products.forEach(p => {
+                container.innerHTML += `
+                    <div class="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <p class="font-bold text-xs text-amber-500">${p.name}</p>
+                            <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:text-red-400 text-[10px]"><i class="fa-solid fa-trash"></i> Sil</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[9px] text-zinc-500">Stok</label>
+                                <input type="number" id="adm-stock-${p.id}" value="${p.stock}" class="w-full bg-zinc-900 border border-zinc-800 rounded p-1 text-xs text-zinc-200">
+                            </div>
+                            <div>
+                                <label class="text-[9px] text-zinc-500">Fiyat (₺)</label>
+                                <input type="number" id="adm-price-${p.id}" value="${p.price}" class="w-full bg-zinc-900 border border-zinc-800 rounded p-1 text-xs text-zinc-200">
+                            </div>
+                        </div>
+                        <button onclick="saveAdminProduct('${p.id}')" class="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px] py-1 rounded transition-all">Kaydet</button>
+                    </div>
+                `;
+            });
+        }
+
+        function saveAdminProduct(id) {
+            const p = products.find(x => x.id === id);
+            p.stock = parseInt(document.getElementById(`adm-stock-${id}`).value);
+            p.price = parseFloat(document.getElementById(`adm-price-${id}`).value);
+            renderProducts();
+            alert(`${p.name} güncellendi.`);
+        }
+
+        function deleteProduct(id) {
+            if (confirm('Bu ürünü silmek istediğinize emin misiniz?')) {
+                products = products.filter(x => x.id !== id);
+                delete cart[id];
+                renderProducts();
+                renderAdminProducts();
+            }
+        }
+
+        renderProducts();
+    </script>
+</body>
+</html>
