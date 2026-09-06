@@ -3,238 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mavibulutmt - Sipariş Sistemi</title>
+    <title>Metropol Towers - Fırın Sipariş</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f4f6f9; color: #333; padding: 15px; }
-        header { text-align: center; padding: 20px 0; background: #2c3e50; color: #fff; border-radius: 8px; margin-bottom: 20px; }
-        h1 { font-size: 24px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .nav-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
-        .nav-btn { flex: 1; padding: 12px; border: none; background: #3498db; color: white; font-weight: bold; border-radius: 6px; cursor: pointer; }
-        .nav-btn.active { background: #2980b9; }
-        .section { display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .section.active { display: block; }
-        
-        /* Müşteri Menü */
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        select, input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-        .menu-items { margin: 20px 0; }
-        .item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .item button { background: #2ecc71; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
-        .btn-order { width: 100%; padding: 15px; background: #e74c3c; color: white; font-size: 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        
-        /* Admin Panel */
-        .order-card { background: #fff8e7; border-left: 5px solid #f39c12; padding: 15px; margin-bottom: 15px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .order-card h3 { margin-bottom: 8px; color: #d35400; }
-        .order-card ul { margin-left: 20px; margin-bottom: 10px; }
-        .btn-complete { background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
-        .sync-status { text-align: center; font-size: 12px; color: #7f8c8d; margin-top: 10px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: #f8f9fa; color: #333; padding: 15px; }
+        header { text-align: center; padding: 15px; background: #2c3e50; color: #fff; border-radius: 8px; margin-bottom: 15px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; background: #e2e8f0; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        .tab-btn.active { background: #3182ce; color: white; }
+        .panel { display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .panel.active { display: block; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 15px; }
+        .form-group { flex: 1; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        select, input { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; }
+        .product-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #edf2f7; }
+        .product-item button { background: #38a169; color: white; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-order { width: 100%; padding: 14px; background: #e53e3e; color: white; font-size: 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 15px; }
+        .order-card { background: #fffaf0; border-left: 4px solid #dd6b20; padding: 12px; margin-bottom: 12px; border-radius: 4px; }
+        .btn-complete { background: #3182ce; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-top: 8px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>Mavibulutmt Sipariş Sistemi</h1>
+        <h2>Metropol Towers Fırın Siparişi</h2>
     </header>
 
-    <div class="nav-buttons">
-        <button class="nav-btn active" onclick="switchTab('customer')">Müşteri Menüsü</button>
-        <button class="nav-btn" onclick="switchTab('admin')">Admin Paneli</button>
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="showTab('customer')">Sipariş Ver</button>
+        <button class="tab-btn" onclick="showTab('admin')">Admin Paneli</button>
     </div>
 
-    <!-- MÜŞTERİ SEKSİYONU -->
-    <div id="customer-section" class="section active">
-        <div class="form-group">
-            <label for="table-select">Masa Seçin:</label>
-            <select id="table-select">
-                <option value="Masa 1">Masa 1</option>
-                <option value="Masa 2">Masa 2</option>
-                <option value="Masa 3">Masa 3</option>
-                <option value="Masa 4">Masa 4</option>
-                <option value="Masa 5">Masa 5</option>
-            </select>
-        </div>
-
-        <h3>Menü</h3>
-        <div class="menu-items">
-            <div class="item">
-                <span>Çay - 15 TL</span>
-                <button onclick="addToCart('Çay', 15)">Ekle</button>
+    <!-- MÜŞTERİ PANELİ -->
+    <div id="customer-panel" class="panel active">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Blok Seçin:</label>
+                <select id="block-select">
+                    <option value="D Blok">D Blok</option>
+                    <option value="E Blok">E Blok</option>
+                    <option value="F Blok">F Blok</option>
+                    <option value="G Blok">G Blok</option>
+                </select>
             </div>
-            <div class="item">
-                <span>Kahve - 40 TL</span>
-                <button onclick="addToCart('Kahve', 40)">Ekle</button>
-            </div>
-            <div class="item">
-                <span>Toast - 60 TL</span>
-                <button onclick="addToCart('Tost', 60)">Ekle</button>
-            </div>
-            <div class="item">
-                <span>Su - 10 TL</span>
-                <button onclick="addToCart('Su', 10)">Ekle</button>
+            <div class="form-group">
+                <label>Daire No:</label>
+                <select id="unit-select"></select>
             </div>
         </div>
 
-        <h4>Sepetiniz:</h4>
-        <ul id="cart-list" style="margin: 10px 0 20px 20px;"></ul>
-        <p style="margin-bottom: 15px; font-weight: bold;">Toplam: <span id="cart-total">0</span> TL</p>
+        <h3>Ürünler</h3>
+        <div class="product-item">
+            <span>Ekmek - 10 TL</span>
+            <button onclick="addToCart('Ekmek', 10)">Ekle</button>
+        </div>
+        <div class="product-item">
+            <span>Simit - 15 TL</span>
+            <button onclick="addToCart('Simit', 15)">Ekle</button>
+        </div>
+        <div class="product-item">
+            <span>Poğaça - 15 TL</span>
+            <button onclick="addToCart('Poğaça', 15)">Ekle</button>
+        </div>
 
-        <button class="btn-order" onclick="sendOrder()">Siparişi Gönder</button>
+        <h4 style="margin-top: 15px;">Sepetiniz</h4>
+        <ul id="cart-list" style="margin-left: 20px; padding: 5px 0;"></ul>
+        <p style="font-weight: bold;">Toplam: <span id="total-price">0</span> TL</p>
+
+        <button class="btn-order" onclick="sendOrder()">Siparişi Onayla ve Gönder</button>
     </div>
 
-    <!-- ADMİN SEKSİYONU -->
-    <div id="admin-section" class="section">
-        <h2>Gelen Siparişler (Canlı)</h2>
-        <div class="sync-status" id="sync-status">Siparişler senkronize ediliyor...</div>
-        <hr style="margin: 15px 0;">
-        <div id="orders-container">
-            <p>Henüz sipariş yok veya yükleniyor...</p>
+    <!-- ADMİN PANELİ -->
+    <div id="admin-panel" class="panel">
+        <div id="admin-login">
+            <h3>Admin Girişi</h3>
+            <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Giriş kodunu giriniz:</p>
+            <input type="password" id="admin-pass" placeholder="Kod">
+            <button class="btn-order" style="background: #3182ce; margin-top: 10px;" onclick="checkAdmin()">Giriş Yap</button>
+        </div>
+
+        <div id="admin-content" style="display: none;">
+            <h3>Gelen Daire Siparişleri (Canlı)</h3>
+            <p id="sync-info" style="font-size: 12px; color: #718096; margin-bottom: 10px;">Yükleniyor...</p>
+            <div id="orders-list"></div>
         </div>
     </div>
 </div>
 
 <script>
-    // Ücretsiz ve hesap gerektirmeyen canlı veritabanı adresi
     const DB_URL = "https://api.npoint.io/871891bca7975d4a1cf6";
-
     let cart = [];
-    let cartTotal = 0;
+    let total = 0;
+    let isAdminLoggedIn = false;
 
-    function switchTab(tab) {
-        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+    // Daire numaralarını (1-11) doldur
+    const unitSelect = document.getElementById('unit-select');
+    for (let i = 1; i <= 11; i++) {
+        let opt = document.createElement('option');
+        opt.value = "Daire " + i;
+        opt.textContent = "Daire " + i;
+        unitSelect.appendChild(opt);
+    }
+
+    function showTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
 
         if (tab === 'customer') {
-            document.querySelectorAll('.nav-btn')[0].classList.add('active');
-            document.getElementById('customer-section').classList.add('active');
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.getElementById('customer-panel').classList.add('active');
         } else {
-            document.querySelectorAll('.nav-btn')[1].classList.add('active');
-            document.getElementById('admin-section').classList.add('active');
-            fetchOrders(); // Admin sekmesine geçince hemen çek
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.getElementById('admin-panel').classList.add('active');
+            if (isAdminLoggedIn) fetchOrders();
         }
     }
 
     function addToCart(name, price) {
         cart.push({ name, price });
-        cartTotal += price;
-        updateCartUI();
+        total += price;
+        renderCart();
     }
 
-    function updateCartUI() {
+    function renderCart() {
         const list = document.getElementById('cart-list');
         list.innerHTML = '';
-        cart.forEach((item) => {
-            const li = document.createElement('li');
-            li.textContent = `${item.name} - ${item.price} TL`;
+        cart.forEach(item => {
+            let li = document.createElement('li');
+            li.textContent = `${item.name} (${item.price} TL)`;
             list.appendChild(li);
         });
-        document.getElementById('cart-total').textContent = cartTotal;
+        document.getElementById('total-price').textContent = total;
     }
 
     async function sendOrder() {
-        if (cart.length === 0) {
-            alert("Sepetiniz boş!");
-            return;
-        }
+        if (cart.length === 0) return alert("Sepet boş!");
 
-        const tableNo = document.getElementById('table-select').value;
+        const block = document.getElementById('block-select').value;
+        const unit = document.getElementById('unit-select').value;
+
         const newOrder = {
             id: Date.now(),
-            table: tableNo,
+            location: `${block} - ${unit}`,
             items: cart,
-            total: cartTotal,
-            time: new Date().toLocaleTimeString()
+            total: total,
+            time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
         };
 
         try {
-            // Önce mevcut siparişleri çek
             const res = await fetch(DB_URL);
-            let currentData = await res.json();
-            if (!Array.isArray(currentData)) currentData = [];
+            let orders = await res.json();
+            if (!Array.isArray(orders)) orders = [];
 
-            // Yeni siparişi ekle ve gönder
-            currentData.push(newOrder);
+            orders.push(newOrder);
 
             await fetch(DB_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(currentData)
+                body: JSON.stringify(orders)
             });
 
-            alert("Siparişiniz başarıyla alındı!");
+            alert("Sipariş fırına iletildi!");
             cart = [];
-            cartTotal = 0;
-            updateCartUI();
+            total = 0;
+            renderCart();
         } catch (err) {
-            alert("Sipariş gönderilirken hata oluştu. Tekrar deneyin.");
-            console.error(err);
+            alert("Hata oluştu, tekrar deneyin.");
+        }
+    }
+
+    function checkAdmin() {
+        const pass = document.getElementById('admin-pass').value;
+        if (pass === "160703") {
+            isAdminLoggedIn = true;
+            document.getElementById('admin-login').style.display = 'none';
+            document.getElementById('admin-content').style.display = 'block';
+            fetchOrders();
+            setInterval(fetchOrders, 3000); // 3 saniyede bir canlı senkronizasyon
+        } else {
+            alert("Hatalı kod!");
         }
     }
 
     async function fetchOrders() {
+        if (!isAdminLoggedIn) return;
         try {
             const res = await fetch(DB_URL);
             const orders = await res.json();
-            renderOrders(Array.isArray(orders) ? orders : []);
-            document.getElementById('sync-status').textContent = "Son güncelleme: " + new Date().toLocaleTimeString();
+            renderAdminOrders(Array.isArray(orders) ? orders : []);
+            document.getElementById('sync-info').textContent = "Son güncelleme: " + new Date().toLocaleTimeString();
         } catch (err) {
-            document.getElementById('sync-status').textContent = "Veri çekme hatası oluştu.";
+            document.getElementById('sync-info').textContent = "Bağlantı hatası.";
         }
     }
 
-    function renderOrders(orders) {
-        const container = document.getElementById('orders-container');
+    function renderAdminOrders(orders) {
+        const container = document.getElementById('orders-list');
         if (orders.length === 0) {
-            container.innerHTML = '<p>Şu an aktif sipariş yok.</p>';
+            container.innerHTML = '<p>Bekleyen sipariş yok.</p>';
             return;
         }
 
         container.innerHTML = '';
         orders.forEach(order => {
-            const card = document.createElement('div');
+            let itemsHtml = order.items.map(i => `<li>${i.name}</li>`).join('');
+            let card = document.createElement('div');
             card.className = 'order-card';
-
-            let itemsList = '';
-            order.items.forEach(item => {
-                itemsList += `<li>${item.name} (${item.price} TL)</li>`;
-            });
-
             card.innerHTML = `
-                <h3>${order.table} - Total: ${order.total} TL</h3>
-                <small>Saat: ${order.time}</small>
-                <ul>${itemsList}</ul>
-                <button class="btn-complete" onclick="completeOrder(${order.id})">Siparişi Tamamla / Sil</button>
+                <strong>${order.location}</strong> (${order.time})
+                <ul style="margin-left: 20px; margin-top: 5px;">${itemsHtml}</ul>
+                <div style="margin-top: 5px; font-weight: bold;">Toplam: ${order.total} TL</div>
+                <button class="btn-complete" onclick="completeOrder(${order.id})">Teslim Edildi / Sil</button>
             `;
             container.appendChild(card);
         });
     }
 
-    async function completeOrder(orderId) {
+    async function completeOrder(id) {
         try {
             const res = await fetch(DB_URL);
-            let currentData = await res.json();
-            if (!Array.isArray(currentData)) return;
+            let orders = await res.json();
+            if (!Array.isArray(orders)) return;
 
-            // Seçilen siparişi listeden çıkar
-            const updatedData = currentData.filter(order => order.id !== orderId);
+            orders = orders.filter(o => o.id !== id);
 
             await fetch(DB_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updatedData)
+                body: JSON.stringify(orders)
             });
 
             fetchOrders();
         } catch (err) {
-            alert("Sipariş silinirken hata oluştu.");
+            alert("Silinirken hata oluştu.");
         }
     }
-
-    // Her 3 saniyede bir otomatik olarak yeni sipariş var mı kontrol et
-    setInterval(fetchOrders, 3000);
 </script>
 
 </body>
