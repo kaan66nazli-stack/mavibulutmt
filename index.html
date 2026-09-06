@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Metropol Towers - Fırın Sipariş Platformu</title>
+    <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f4f6f9; color: #333; padding: 15px; }
@@ -120,9 +121,9 @@
             
             <!-- Gelen Siparişler -->
             <div class="admin-section">
-                <h3>Gelen Siparişler</h3>
+                <h3>Gelen Siparişler (Canlı)</h3>
                 <div id="orders-container" style="margin-top: 10px;">
-                    <p style="color: #718096;">Sipariş yok.</p>
+                    <p style="color: #718096;">Bekleyen sipariş yok.</p>
                 </div>
             </div>
 
@@ -138,7 +139,7 @@
                         <div class="form-group"><input type="number" id="new-prod-stock" placeholder="Stok Adedi"></div>
                         <div class="form-group"><input type="number" id="new-prod-max" placeholder="Max Alım"></div>
                     </div>
-                    <button class="btn-add" style="width: 100%;" onclick="addNewProduct()">Ürünü Kaydet</button>
+                    <button class="btn-add" style="width: 100%;" onclick="addNewProduct()">Ürünü Kaydet ve Yayınla</button>
                 </div>
 
                 <div id="admin-product-list"></div>
@@ -149,19 +150,24 @@
 </div>
 
 <script>
-    // Başlangıç Ürün Listesi
-    let products = JSON.parse(localStorage.getItem('mt_products')) || [
+    // Varsayılan Ürünler
+    let defaultProducts = [
         { id: 1, name: 'Somun Ekmek', price: 10, stock: 50, maxLimit: 5 },
         { id: 2, name: 'Susamlı Simit', price: 15, stock: 30, maxLimit: 10 },
         { id: 3, name: 'Peynirli Poğaça', price: 15, stock: 20, maxLimit: 10 }
     ];
 
+    let products = JSON.parse(localStorage.getItem('mt_products')) || defaultProducts;
+    let orders = JSON.parse(localStorage.getItem('mt_orders')) || [];
     let cart = [];
     let cartTotal = 0;
     let isAdmin = false;
-    const channel = new BroadcastChannel('metropol_towers_channel');
 
-    // Daireleri Doldur
+    // PUSHER CANLI YAYIN TÜNELİ (Cihazlar arası anlık senkronizasyon)
+    const pusher = new Pusher('24d26da54efed745efed', { cluster: 'eu' });
+    const channel = pusher.subscribe('metropol-firin-channel');
+
+    // Daire Numaralarını Doldur (1-11)
     const unitSelect = document.getElementById('unit-select');
     for (let i = 1; i <= 11; i++) {
         let opt = document.createElement('option');
@@ -170,22 +176,38 @@
         unitSelect.appendChild(opt);
     }
 
-    // Ekranı Başlat
     renderCustomerProducts();
     checkMyOrderStatus();
 
-    // Canlı İletişim Dinleyici
-    channel.onmessage = (event) => {
-        if (event.data.type === 'NEW_ORDER' && isAdmin) {
-            renderAdminOrders();
-        } else if (event.data.type === 'STATUS_UPDATE') {
+    // CANLI SİNYAL DİNLEYİCİ
+    channel.bind('app-event', function(data) {
+        if (data.action === 'NEW_ORDER') {
+            orders.push(data.order);
+            localStorage.setItem('mt_orders', JSON.stringify(orders));
+            if (isAdmin) renderAdminOrders();
+        } 
+        else if (data.action === 'STATUS_UPDATE') {
+            let targetOrder = orders.find(o => o.id === data.orderId);
+            if (targetOrder) targetOrder.status = 'COMPLETED';
+            localStorage.setItem('mt_orders', JSON.stringify(orders));
             checkMyOrderStatus();
-        } else if (event.data.type === 'PRODUCTS_UPDATED') {
-            products = JSON.parse(localStorage.getItem('mt_products')) || [];
+            if (isAdmin) renderAdminOrders();
+        } 
+        else if (data.action === 'PRODUCTS_UPDATED') {
+            products = data.products;
+            localStorage.setItem('mt_products', JSON.stringify(products));
             renderCustomerProducts();
             if (isAdmin) renderAdminProducts();
         }
-    };
+    });
+
+    function broadcast(payload) {
+        fetch('https://api.pipedream.com/v1/sources/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).catch(() => {});
+    }
 
     function switchTab(tab) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -204,7 +226,7 @@
         }
     }
 
-    /* MÜŞTERİ İŞLEMLERİ */
+    /* MÜŞTERİ PANELİ */
     function renderCustomerProducts() {
         const container = document.getElementById('customer-product-list');
         container.innerHTML = '';
@@ -259,50 +281,45 @@
 
         const block = document.getElementById('block-select').value;
         const unit = document.getElementById('unit-select').value;
-        const location = `${block} - ${unit}`;
 
         const order = {
             id: Date.now(),
-            location: location,
+            location: `${block} - ${unit}`,
             items: cart,
             total: cartTotal,
             status: 'PENDING',
             time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
         };
 
-        // Stokları Düş
+        // Stok güncelle
         cart.forEach(cItem => {
             const p = products.find(prod => prod.id === cItem.id);
             if (p) p.stock -= 1;
         });
-        saveProducts();
 
-        // Siparişi Kaydet
-        let orders = JSON.parse(localStorage.getItem('mt_orders')) || [];
         orders.push(order);
         localStorage.setItem('mt_orders', JSON.stringify(orders));
+        localStorage.setItem('mt_products', JSON.stringify(products));
         localStorage.setItem('mt_my_last_order', JSON.stringify(order));
 
-        channel.postMessage({ type: 'NEW_ORDER' });
-        channel.postMessage({ type: 'PRODUCTS_UPDATED' });
+        // Tüm cihazlara yayınla
+        broadcast({ action: 'NEW_ORDER', order: order });
+        broadcast({ action: 'PRODUCTS_UPDATED', products: products });
 
         alert("Siparişiniz fırına iletildi!");
         cart = [];
         cartTotal = 0;
         updateCartUI();
+        renderCustomerProducts();
         checkMyOrderStatus();
     }
 
     function checkMyOrderStatus() {
         const myOrder = JSON.parse(localStorage.getItem('mt_my_last_order'));
         const tracker = document.getElementById('customer-order-tracker');
-        
         if (!myOrder) return;
 
-        // Güncel durumu ana listeden kontrol et
-        const allOrders = JSON.parse(localStorage.getItem('mt_orders')) || [];
-        const currentOrder = allOrders.find(o => o.id === myOrder.id);
-
+        const currentOrder = orders.find(o => o.id === myOrder.id);
         tracker.style.display = 'block';
         document.getElementById('tracker-location').textContent = myOrder.location + " (" + myOrder.time + ")";
         
@@ -316,7 +333,7 @@
         }
     }
 
-    /* ADMİN İŞLEMLERİ */
+    /* ADMİN PANELİ */
     function loginAdmin() {
         if (document.getElementById('admin-pass').value === "160703") {
             isAdmin = true;
@@ -331,8 +348,6 @@
 
     function renderAdminOrders() {
         const container = document.getElementById('orders-container');
-        const orders = JSON.parse(localStorage.getItem('mt_orders')) || [];
-        
         if (orders.length === 0) {
             container.innerHTML = '<p style="color: #718096;">Bekleyen sipariş yok.</p>';
             return;
@@ -359,21 +374,19 @@
     }
 
     function markOrderCompleted(orderId) {
-        let orders = JSON.parse(localStorage.getItem('mt_orders')) || [];
         let order = orders.find(o => o.id === orderId);
         if (order) {
             order.status = 'COMPLETED';
             localStorage.setItem('mt_orders', JSON.stringify(orders));
-            
-            // Müşteri ekranına anlık sinyal gönder
-            channel.postMessage({ type: 'STATUS_UPDATE' });
+            broadcast({ action: 'STATUS_UPDATE', orderId: orderId });
             renderAdminOrders();
+            checkMyOrderStatus();
         }
     }
 
     function renderAdminProducts() {
         const container = document.getElementById('admin-product-list');
-        container.innerHTML = '<h5>Mevcut Ürünler & Düzenleme</h5>';
+        container.innerHTML = '<h5>Mevcut Ürünler</h5>';
         products.forEach(p => {
             container.innerHTML += `
                 <div class="admin-prod-item">
@@ -381,9 +394,7 @@
                         <strong>${p.name}</strong> - ${p.price} TL
                         <br><small style="color: #718096;">Stok: ${p.stock} | Max Limit: ${p.maxLimit}</small>
                     </div>
-                    <div>
-                        <button class="btn-delete" onclick="deleteProduct(${p.id})">Sil</button>
-                    </div>
+                    <button class="btn-delete" onclick="deleteProduct(${p.id})">Sil</button>
                 </div>
             `;
         });
@@ -396,12 +407,14 @@
         const max = parseInt(document.getElementById('new-prod-max').value);
 
         if (!name || isNaN(price) || isNaN(stock) || isNaN(max)) {
-            return alert("Lütfen tüm ürün alanlarını doldurun!");
+            return alert("Lütfen tüm alanları doldurun!");
         }
 
         products.push({ id: Date.now(), name, price, stock, maxLimit: max });
-        saveProducts();
+        localStorage.setItem('mt_products', JSON.stringify(products));
         
+        broadcast({ action: 'PRODUCTS_UPDATED', products: products });
+
         document.getElementById('new-prod-name').value = '';
         document.getElementById('new-prod-price').value = '';
         document.getElementById('new-prod-stock').value = '';
@@ -409,19 +422,14 @@
 
         renderAdminProducts();
         renderCustomerProducts();
-        channel.postMessage({ type: 'PRODUCTS_UPDATED' });
     }
 
     function deleteProduct(id) {
         products = products.filter(p => p.id !== id);
-        saveProducts();
+        localStorage.setItem('mt_products', JSON.stringify(products));
+        broadcast({ action: 'PRODUCTS_UPDATED', products: products });
         renderAdminProducts();
         renderCustomerProducts();
-        channel.postMessage({ type: 'PRODUCTS_UPDATED' });
-    }
-
-    function saveProducts() {
-        localStorage.setItem('mt_products', JSON.stringify(products));
     }
 </script>
 
