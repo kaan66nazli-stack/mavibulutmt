@@ -2,212 +2,248 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metropol Towers - Fırın Sipariş Platformu</title>
-    <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GetirFırın - Metropol Express</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f4f6f9; color: #333; padding: 15px; }
-        header { text-align: center; padding: 20px; background: #2c3e50; color: white; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .container { max-width: 650px; margin: 0 auto; }
-        
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { flex: 1; padding: 14px; border: none; background: #e2e8f0; font-weight: bold; font-size: 15px; border-radius: 6px; cursor: pointer; color: #4a5568; }
-        .tab-btn.active { background: #3182ce; color: white; }
-        
-        .panel { display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .panel.active { display: block; }
-        
-        .form-row { display: flex; gap: 10px; margin-bottom: 15px; }
-        .form-group { flex: 1; margin-bottom: 10px; }
-        label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 14px; color: #2d3748; }
-        select, input { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; }
-        
-        .product-title { margin: 20px 0 10px 0; font-size: 16px; border-bottom: 2px solid #edf2f7; padding-bottom: 5px; font-weight: bold; }
-        .product-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #edf2f7; }
-        .product-info { display: flex; flex-direction: column; }
-        .product-name { font-weight: 600; }
-        .product-meta { color: #718096; font-size: 12px; }
-        .btn-add { background: #38a169; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-add:disabled { background: #cbd5e0; cursor: not-allowed; }
-        
-        .cart-box { background: #f7fafc; padding: 15px; border-radius: 6px; margin-top: 15px; border: 1px solid #e2e8f0; }
-        .cart-items { list-style: none; margin-bottom: 10px; }
-        .cart-items li { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; }
-        .cart-total { font-weight: bold; font-size: 16px; color: #2d3748; border-top: 1px solid #e2e8f0; padding-top: 8px; display: flex; justify-content: space-between; }
-        .btn-order { width: 100%; padding: 15px; background: #e53e3e; color: white; font-size: 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 15px; }
-        
-        /* Müşteri Sipariş Takip Kutusu */
-        .order-status-box { background: #ebf8ff; border: 2px solid #3182ce; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
-        .status-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; margin-top: 5px; }
-        .status-pending { background: #feebc8; color: #c05621; }
-        .status-completed { background: #c6f6d5; color: #22543d; }
+        :root {
+            --getir-purple: #5d3ebc;
+            --getir-yellow: #ffd300;
+            --bg-gray: #f2f3f7;
+            --card-bg: #ffffff;
+            --text-dark: #191919;
+            --text-muted: #697488;
+            --danger: #f00056;
+            --success: #00b152;
+            --border: #e2e8f0;
+        }
 
-        /* Admin Yönetim Paneli */
-        .admin-section { margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; }
-        .order-card { background: #fffaf0; border-left: 5px solid #dd6b20; padding: 15px; margin-bottom: 15px; border-radius: 6px; }
-        .order-header { display: flex; justify-content: space-between; font-weight: bold; color: #c05621; margin-bottom: 8px; }
-        .btn-complete { background: #38a169; color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-delete { background: #e53e3e; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-gray); color: var(--text-dark); padding-bottom: 100px; }
+
+        /* Header */
+        header { background: var(--getir-purple); padding: 14px 16px; color: white; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; box-shadow: 0 4px 15px rgba(93, 62, 188, 0.2); }
+        .brand-logo { font-size: 22px; font-weight: 900; color: var(--getir-yellow); letter-spacing: -0.5px; }
         
-        .admin-prod-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #e2e8f0; }
+        /* Konum ve Arama */
+        .top-controls { padding: 12px 16px 0 16px; display: flex; flex-direction: column; gap: 8px; }
+        .location-bar { background: white; padding: 10px 12px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; gap: 8px; }
+        .location-bar select { flex: 1; border: 1px solid var(--border); background: var(--bg-gray); padding: 8px; border-radius: 8px; font-weight: 700; font-size: 12px; color: var(--text-dark); outline: none; }
+        .search-bar input { width: 100%; background: white; border: 1px solid var(--border); padding: 10px 14px; border-radius: 12px; font-size: 13px; outline: none; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+
+        /* Tab Menü */
+        .nav-tabs { display: flex; background: white; margin: 10px 16px; border-radius: 12px; padding: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .tab-btn { flex: 1; padding: 8px; border: none; background: transparent; font-weight: 700; font-size: 13px; border-radius: 8px; cursor: pointer; color: var(--text-muted); }
+        .tab-btn.active { background: var(--getir-purple); color: white; }
+
+        /* Kategoriler (Yatay Kaydırma) */
+        .categories-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 5px 16px 10px 16px; scrollbar-width: none; }
+        .categories-scroll::-webkit-scrollbar { display: none; }
+        .cat-chip { background: white; border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer; color: var(--text-muted); }
+        .cat-chip.active { background: var(--getir-yellow); color: var(--getir-purple); border-color: var(--getir-yellow); }
+
+        .container { padding: 0 16px; }
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        /* Canlı Takip Kartı & İlerleme Çubuğu */
+        .tracker-card { background: white; border-radius: 16px; padding: 14px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        .tracker-steps { display: flex; justify-content: space-between; margin-top: 12px; position: relative; }
+        .step-dot { font-size: 10px; font-weight: 800; color: var(--text-muted); text-align: center; flex: 1; }
+        .step-dot.active { color: var(--getir-purple); }
+
+        /* Ürün Grid */
+        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .product-card { background: white; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; position: relative; border: 1px solid var(--border); }
+        .product-price { font-size: 15px; font-weight: 900; color: var(--getir-purple); }
+        .product-name { font-weight: 700; font-size: 13px; margin: 4px 0; color: var(--text-dark); }
+        .product-info-tag { font-size: 10px; color: var(--text-muted); font-weight: 600; }
+        .btn-add-item { background: white; border: 1px solid var(--border); color: var(--getir-purple); width: 32px; height: 32px; border-radius: 8px; font-weight: 900; font-size: 18px; cursor: pointer; position: absolute; right: 10px; top: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); }
+
+        /* Alt Sepet BARI */
+        .bottom-cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px 16px; border-top-left-radius: 16px; border-top-right-radius: 16px; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; z-index: 99; }
+        .cart-price { font-size: 17px; font-weight: 900; color: var(--getir-purple); }
+        .btn-checkout { background: var(--getir-yellow); color: var(--getir-purple); border: none; padding: 10px 18px; border-radius: 10px; font-weight: 900; font-size: 13px; cursor: pointer; }
+
+        /* Modal (Sepet İnceleme) */
+        .modal { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: flex-end; }
+        .modal-content { background: white; width: 100%; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 20px; max-height: 80vh; overflow-y: auto; }
+        .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .qty-btn { width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--border); background: white; font-weight: bold; cursor: pointer; }
+
+        /* Admin Kartları */
+        .admin-card { background: white; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); }
+        .form-group { margin-bottom: 8px; }
+        .form-group label { display: block; font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; outline: none; }
+        .btn-action { width: 100%; padding: 10px; border-radius: 8px; border: none; font-weight: 800; cursor: pointer; font-size: 12px; }
+        .btn-purple { background: var(--getir-purple); color: white; }
+        .status-select { padding: 4px; border-radius: 6px; font-weight: bold; font-size: 11px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h2>Metropol Towers</h2>
-        <p style="font-size: 13px; opacity: 0.8;">Fırın Sipariş Platformu</p>
-    </header>
+<header>
+    <div class="brand-logo">getir<span style="color:white;">fırın</span></div>
+</header>
 
-    <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('customer')">Sipariş Ver</button>
-        <button class="tab-btn" onclick="switchTab('admin')">Admin Paneli</button>
+<div class="top-controls">
+    <div class="location-bar">
+        <select id="block-select">
+            <option value="D Blok">D Blok</option>
+            <option value="E Blok">E Blok</option>
+            <option value="F Blok">F Blok</option>
+            <option value="G Blok">G Blok</option>
+        </select>
+        <select id="unit-select"></select>
     </div>
+    <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Ürün ara..." oninput="filterProducts()">
+    </div>
+</div>
 
-    <!-- MÜŞTERİ SEKSİYONU -->
+<div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('customer')">Ürünler</button>
+    <button class="tab-btn" onclick="switchTab('admin')">Yönetim Paneli</button>
+</div>
+
+<!-- KATEGORİ SEÇİCİ -->
+<div id="category-bar" class="categories-scroll">
+    <div class="cat-chip active" onclick="filterCategory('Tümü', this)">Tümü</div>
+    <div class="cat-chip" onclick="filterCategory('Fırın', this)">🥐 Fırın</div>
+    <div class="cat-chip" onclick="filterCategory('İçecek', this)">🥤 İçecek</div>
+    <div class="cat-chip" onclick="filterCategory('Atıştırmalık', this)">🍫 Atıştırmalık</div>
+    <div class="cat-chip" onclick="filterCategory('Temel Gıda', this)">🧀 Temel Gıda</div>
+</div>
+
+<div class="container">
+    <!-- MÜŞTERİ PANELİ -->
     <div id="customer-panel" class="panel active">
         
-        <!-- Canlı Sipariş Durum Ekranı -->
-        <div id="customer-order-tracker" style="display: none;" class="order-status-box">
-            <h4>Sipariş Durumunuz</h4>
-            <p id="tracker-location" style="font-size: 13px; color: #4a5568; margin-top: 4px;"></p>
-            <div id="tracker-status" class="status-badge status-pending">Hazırlanıyor / Yolda</div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group">
-                <label>Blok Seçiniz:</label>
-                <select id="block-select">
-                    <option value="D Blok">D Blok</option>
-                    <option value="E Blok">E Blok</option>
-                    <option value="F Blok">F Blok</option>
-                    <option value="G Blok">G Blok</option>
-                </select>
+        <!-- Canlı Sipariş Takip Rozeti -->
+        <div id="customer-order-tracker" style="display: none;" class="tracker-card">
+            <div style="font-size: 13px; font-weight: 800; color: var(--getir-purple); display: flex; justify-content: space-between;">
+                <span>Sipariş Durumu</span>
+                <span id="tracker-time" style="font-size:11px; color:var(--text-muted);"></span>
             </div>
-            <div class="form-group">
-                <label>Daire No:</label>
-                <select id="unit-select"></select>
+            <p id="tracker-location" style="font-size: 11px; color: var(--text-muted); margin-top: 2px;"></p>
+            
+            <div class="tracker-steps">
+                <div id="step-RECEIVED" class="step-step step-dot">1. Alındı</div>
+                <div id="step-PREPARING" class="step-step step-dot">2. Hazırlanıyor</div>
+                <div id="step-ON_THE_WAY" class="step-step step-dot">3. Kuryede</div>
+                <div id="step-DELIVERED" class="step-step step-dot">4. Teslim Edildi</div>
             </div>
         </div>
 
-        <div class="product-title">Taze Fırın Ürünleri</div>
-        <div id="customer-product-list"></div>
-
-        <div class="cart-box">
-            <label>Sepetiniz</label>
-            <ul id="cart-list" class="cart-items">
-                <li style="color: #a0aec0;">Sepetiniz henüz boş.</li>
-            </ul>
-            <div class="cart-total">
-                <span>Toplam Tutar:</span>
-                <span><span id="cart-total">0</span> TL</span>
-            </div>
-        </div>
-
-        <button class="btn-order" onclick="sendOrder()">Siparişi Fırına Gönder</button>
+        <div id="customer-product-list" class="product-grid"></div>
     </div>
 
-    <!-- ADMİN SEKSİYONU -->
+    <!-- ADMİN PANELİ -->
     <div id="admin-panel" class="panel">
-        <div id="admin-login">
-            <label>Admin Panel Girişi</label>
-            <input type="password" id="admin-pass" placeholder="Şifre (160703)" style="margin-top: 8px;">
-            <button class="btn-order" style="background: #3182ce;" onclick="loginAdmin()">Giriş Yap</button>
+        <div id="admin-login" class="admin-card">
+            <div class="form-group">
+                <label>Giriş Şifresi</label>
+                <input type="password" id="admin-pass" placeholder="Şifre">
+            </div>
+            <button class="btn-action btn-purple" onclick="loginAdmin()">Giriş Yap</button>
         </div>
 
         <div id="admin-content" style="display: none;">
-            
-            <!-- Gelen Siparişler -->
-            <div class="admin-section">
-                <h3>Gelen Siparişler (Canlı)</h3>
-                <div id="orders-container" style="margin-top: 10px;">
-                    <p style="color: #718096;">Bekleyen sipariş yok.</p>
+            <h4 style="margin-bottom:10px;">Gelen Siparişler</h4>
+            <div id="orders-container"></div>
+
+            <h4 style="margin:20px 0 10px 0;">Ürün / Stok Ekle</h4>
+            <div class="admin-card">
+                <div class="form-group"><input type="text" id="new-prod-name" placeholder="Ürün Adı"></div>
+                <div class="form-group">
+                    <select id="new-prod-cat">
+                        <option value="Fırın">Fırın</option>
+                        <option value="İçecek">İçecek</option>
+                        <option value="Atıştırmalık">Atıştırmalık</option>
+                        <option value="Temel Gıda">Temel Gıda</option>
+                    </select>
                 </div>
+                <div style="display:flex; gap:6px;">
+                    <div class="form-group" style="flex:1;"><input type="number" id="new-prod-price" placeholder="Fiyat"></div>
+                    <div class="form-group" style="flex:1;"><input type="number" id="new-prod-stock" placeholder="Stok"></div>
+                    <div class="form-group" style="flex:1;"><input type="number" id="new-prod-max" placeholder="Max Limit"></div>
+                </div>
+                <button class="btn-action btn-purple" onclick="addNewProduct()">Yayınla</button>
             </div>
 
-            <!-- Ürün ve Stok Yönetimi -->
-            <div class="admin-section">
-                <h3>Ürün & Stok Yönetimi</h3>
-                
-                <div style="background: #edf2f7; padding: 12px; border-radius: 6px; margin: 10px 0;">
-                    <h5 style="margin-bottom: 8px;">Yeni Ürün Ekle</h5>
-                    <div class="form-group"><input type="text" id="new-prod-name" placeholder="Ürün Adı"></div>
-                    <div class="form-row">
-                        <div class="form-group"><input type="number" id="new-prod-price" placeholder="Fiyat (TL)"></div>
-                        <div class="form-group"><input type="number" id="new-prod-stock" placeholder="Stok Adedi"></div>
-                        <div class="form-group"><input type="number" id="new-prod-max" placeholder="Max Alım"></div>
-                    </div>
-                    <button class="btn-add" style="width: 100%;" onclick="addNewProduct()">Ürünü Kaydet ve Yayınla</button>
-                </div>
+            <div id="admin-product-list"></div>
+        </div>
+    </div>
+</div>
 
-                <div id="admin-product-list"></div>
-            </div>
+<!-- ALT SEPET BARI -->
+<div id="cart-bar" class="bottom-cart-bar">
+    <div>
+        <div class="cart-price"><span id="cart-total">0.00</span> TL</div>
+        <div style="font-size:10px; color:var(--text-muted);" id="cart-count-text">0 Ürün</div>
+    </div>
+    <button class="btn-checkout" onclick="openCartModal()">Sepeti İncele</button>
+</div>
 
+<!-- SEPET MODAL (POPUP) -->
+<div id="cart-modal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 12px; font-size:16px;">Sepet Detayı</h3>
+        <div id="modal-cart-items"></div>
+        <div style="margin-top: 15px; font-size:12px; color:var(--text-muted);">
+            <div>Ürünler Toplamı: <b id="sub-total">0.00</b> TL</div>
+            <div>Getirme Ücreti: <b>15.00 TL</b></div>
+            <hr style="margin: 8px 0; border:none; border-top:1px solid var(--border);">
+            <div style="font-size:15px; color:var(--text-dark);">Toplam: <b id="grand-total" style="color:var(--getir-purple);">0.00</b> TL</div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn-action" style="background:var(--bg-gray);" onclick="closeCartModal()">Kapat</button>
+            <button class="btn-action btn-purple" onclick="sendOrder()">Siparişi Onayla</button>
         </div>
     </div>
 </div>
 
 <script>
-    // Varsayılan Ürünler
-    let defaultProducts = [
-        { id: 1, name: 'Somun Ekmek', price: 10, stock: 50, maxLimit: 5 },
-        { id: 2, name: 'Susamlı Simit', price: 15, stock: 30, maxLimit: 10 },
-        { id: 3, name: 'Peynirli Poğaça', price: 15, stock: 20, maxLimit: 10 }
-    ];
+    // FIREBASE AYARLARI
+    const firebaseConfig = {
+        apiKey: "SENIN_API_KEY",
+        authDomain: "SENIN_PROJECT_ID.firebaseapp.com",
+        databaseURL: "https://SENIN_PROJECT_ID-default-rtdb.firebaseio.com",
+        projectId: "SENIN_PROJECT_ID",
+        storageBucket: "SENIN_PROJECT_ID.appspot.com",
+        messagingSenderId: "123456789",
+        appId: "1:123456789:web:abcdef"
+    };
 
-    let products = JSON.parse(localStorage.getItem('mt_products')) || defaultProducts;
-    let orders = JSON.parse(localStorage.getItem('mt_orders')) || [];
-    let cart = [];
-    let cartTotal = 0;
-    let isAdmin = false;
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    // PUSHER CANLI YAYIN TÜNELİ (Cihazlar arası anlık senkronizasyon)
-    const pusher = new Pusher('24d26da54efed745efed', { cluster: 'eu' });
-    const channel = pusher.subscribe('metropol-firin-channel');
+    let products = [], orders = [], cart = [], selectedCategory = 'Tümü', isAdmin = false;
 
-    // Daire Numaralarını Doldur (1-11)
+    // Daireler
     const unitSelect = document.getElementById('unit-select');
     for (let i = 1; i <= 11; i++) {
         let opt = document.createElement('option');
-        opt.value = "Daire " + i;
-        opt.textContent = "Daire " + i;
+        opt.value = "Daire " + i; opt.textContent = "Daire " + i;
         unitSelect.appendChild(opt);
     }
 
-    renderCustomerProducts();
-    checkMyOrderStatus();
-
-    // CANLI SİNYAL DİNLEYİCİ
-    channel.bind('app-event', function(data) {
-        if (data.action === 'NEW_ORDER') {
-            orders.push(data.order);
-            localStorage.setItem('mt_orders', JSON.stringify(orders));
-            if (isAdmin) renderAdminOrders();
-        } 
-        else if (data.action === 'STATUS_UPDATE') {
-            let targetOrder = orders.find(o => o.id === data.orderId);
-            if (targetOrder) targetOrder.status = 'COMPLETED';
-            localStorage.setItem('mt_orders', JSON.stringify(orders));
-            checkMyOrderStatus();
-            if (isAdmin) renderAdminOrders();
-        } 
-        else if (data.action === 'PRODUCTS_UPDATED') {
-            products = data.products;
-            localStorage.setItem('mt_products', JSON.stringify(products));
-            renderCustomerProducts();
-            if (isAdmin) renderAdminProducts();
-        }
+    db.ref('products').on('value', snapshot => {
+        const data = snapshot.val();
+        products = data ? Object.keys(data).map(key => ({ dbId: key, ...data[key] })) : [];
+        filterProducts();
+        if (isAdmin) renderAdminProducts();
     });
 
-    function broadcast(payload) {
-        fetch('https://api.pipedream.com/v1/sources/run', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        }).catch(() => {});
-    }
+    db.ref('orders').on('value', snapshot => {
+        const data = snapshot.val();
+        orders = data ? Object.keys(data).map(key => ({ dbId: key, ...data[key] })) : [];
+        if (isAdmin) renderAdminOrders();
+        checkMyOrderStatus();
+    });
 
     function switchTab(tab) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -216,185 +252,238 @@
         if (tab === 'customer') {
             document.querySelectorAll('.tab-btn')[0].classList.add('active');
             document.getElementById('customer-panel').classList.add('active');
+            document.getElementById('category-bar').style.display = 'flex';
+            document.getElementById('cart-bar').style.display = 'flex';
         } else {
             document.querySelectorAll('.tab-btn')[1].classList.add('active');
             document.getElementById('admin-panel').classList.add('active');
-            if (isAdmin) {
-                renderAdminOrders();
-                renderAdminProducts();
-            }
+            document.getElementById('category-bar').style.display = 'none';
+            document.getElementById('cart-bar').style.display = 'none';
         }
     }
 
-    /* MÜŞTERİ PANELİ */
-    function renderCustomerProducts() {
+    function filterCategory(cat, elem) {
+        selectedCategory = cat;
+        document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+        elem.classList.add('active');
+        filterProducts();
+    }
+
+    function filterProducts() {
+        const query = document.getElementById('search-input').value.toLowerCase();
+        const filtered = products.filter(p => {
+            const matchCat = selectedCategory === 'Tümü' || p.category === selectedCategory;
+            const matchName = p.name.toLowerCase().includes(query);
+            return matchCat && matchName;
+        });
+        renderCustomerProducts(filtered);
+    }
+
+    function renderCustomerProducts(items) {
         const container = document.getElementById('customer-product-list');
         container.innerHTML = '';
-        products.forEach(p => {
+        if(items.length === 0) {
+            container.innerHTML = '<p style="color:var(--text-muted); font-size:12px; grid-column:span 2;">Ürün bulunamadı.</p>';
+            return;
+        }
+        items.forEach(p => {
             container.innerHTML += `
-                <div class="product-item">
-                    <div class="product-info">
-                        <span class="product-name">${p.name}</span>
-                        <span class="product-meta">${p.price} TL | Stok: ${p.stock} | Max Alım: ${p.maxLimit} Adet</span>
+                <div class="product-card">
+                    <button class="btn-add-item" ${p.stock <= 0 ? 'disabled' : ''} onclick="addToCart('${p.dbId}')">+</button>
+                    <div>
+                        <div class="product-price">${p.price} TL</div>
+                        <div class="product-name">${p.name}</div>
+                        <div class="product-info-tag">Stok: ${p.stock}</div>
                     </div>
-                    <button class="btn-add" ${p.stock <= 0 ? 'disabled' : ''} onclick="addToCart(${p.id})">
-                        ${p.stock <= 0 ? 'Tükendi' : 'Ekle'}
-                    </button>
                 </div>
             `;
         });
     }
 
-    function addToCart(prodId) {
-        const prod = products.find(p => p.id === prodId);
-        const inCartCount = cart.filter(c => c.id === prodId).length;
+    function addToCart(dbId) {
+        const prod = products.find(p => p.dbId === dbId);
+        const inCart = cart.find(c => c.dbId === dbId);
+        const currentQty = inCart ? inCart.qty : 0;
 
-        if (inCartCount >= prod.maxLimit) {
-            alert(`Bu üründen tek seferde en fazla ${prod.maxLimit} adet alabilirsiniz!`);
-            return;
-        }
-        if (inCartCount >= prod.stock) {
-            alert("Yeterli stok yok!");
+        if (currentQty >= prod.maxLimit || currentQty >= prod.stock) {
+            alert("Maksimum alım sınırına veya stok limitine ulaştınız.");
             return;
         }
 
-        cart.push(prod);
-        cartTotal += prod.price;
+        if (inCart) {
+            inCart.qty++;
+        } else {
+            cart.push({ ...prod, qty: 1 });
+        }
         updateCartUI();
     }
 
     function updateCartUI() {
-        const list = document.getElementById('cart-list');
-        if (cart.length === 0) {
-            list.innerHTML = '<li style="color: #a0aec0;">Sepetiniz henüz boş.</li>';
-        } else {
-            list.innerHTML = '';
-            cart.forEach((item) => {
-                list.innerHTML += `<li><span>${item.name}</span><strong>${item.price} TL</strong></li>`;
-            });
+        let total = 0, count = 0;
+        cart.forEach(item => {
+            total += item.price * item.qty;
+            count += item.qty;
+        });
+        document.getElementById('cart-total').textContent = total.toFixed(2);
+        document.getElementById('cart-count-text').textContent = count + " Ürün";
+    }
+
+    function openCartModal() {
+        if (cart.length === 0) return alert("Sepetiniz boş!");
+        const container = document.getElementById('modal-cart-items');
+        container.innerHTML = '';
+        let subtotal = 0;
+
+        cart.forEach(item => {
+            let itemTotal = item.price * item.qty;
+            subtotal += itemTotal;
+            container.innerHTML += `
+                <div class="cart-item-row">
+                    <div>
+                        <div style="font-weight:bold; font-size:13px;">${item.name}</div>
+                        <div style="font-size:11px; color:var(--text-muted);">${item.price} TL x ${item.qty}</div>
+                    </div>
+                    <div>
+                        <button class="qty-btn" onclick="changeQty('${item.dbId}', -1)">-</button>
+                        <span style="margin: 0 8px; font-weight:bold; font-size:13px;">${item.qty}</span>
+                        <button class="qty-btn" onclick="changeQty('${item.dbId}', 1)">+</button>
+                    </div>
+                </div>
+            `;
+        });
+
+        document.getElementById('sub-total').textContent = subtotal.toFixed(2);
+        document.getElementById('grand-total').textContent = (subtotal + 15).toFixed(2);
+        document.getElementById('cart-modal').style.display = 'flex';
+    }
+
+    function changeQty(dbId, delta) {
+        const item = cart.find(c => c.dbId === dbId);
+        if (!item) return;
+        const prod = products.find(p => p.dbId === dbId);
+
+        if (delta > 0 && (item.qty >= prod.maxLimit || item.qty >= prod.stock)) {
+            return alert("Limit aşıldı.");
         }
-        document.getElementById('cart-total').textContent = cartTotal;
+
+        item.qty += delta;
+        if (item.qty <= 0) {
+            cart = cart.filter(c => c.dbId !== dbId);
+        }
+        updateCartUI();
+        if (cart.length === 0) closeCartModal();
+        else openCartModal();
+    }
+
+    function closeCartModal() {
+        document.getElementById('cart-modal').style.display = 'none';
     }
 
     function sendOrder() {
-        if (cart.length === 0) return alert("Sepetiniz boş!");
-
         const block = document.getElementById('block-select').value;
         const unit = document.getElementById('unit-select').value;
+        let subtotal = 0;
+        cart.forEach(i => subtotal += i.price * i.qty);
 
-        const order = {
+        const orderData = {
             id: Date.now(),
             location: `${block} - ${unit}`,
             items: cart,
-            total: cartTotal,
-            status: 'PENDING',
+            total: subtotal + 15,
+            status: 'RECEIVED',
             time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
         };
 
-        // Stok güncelle
+        // Stok Düşürme
         cart.forEach(cItem => {
-            const p = products.find(prod => prod.id === cItem.id);
-            if (p) p.stock -= 1;
+            const p = products.find(prod => prod.dbId === cItem.dbId);
+            if (p) db.ref('products/' + p.dbId).update({ stock: p.stock - cItem.qty });
         });
 
-        orders.push(order);
-        localStorage.setItem('mt_orders', JSON.stringify(orders));
-        localStorage.setItem('mt_products', JSON.stringify(products));
-        localStorage.setItem('mt_my_last_order', JSON.stringify(order));
+        db.ref('orders').push(orderData);
+        localStorage.setItem('mt_last_order_id', orderData.id);
 
-        // Tüm cihazlara yayınla
-        broadcast({ action: 'NEW_ORDER', order: order });
-        broadcast({ action: 'PRODUCTS_UPDATED', products: products });
-
-        alert("Siparişiniz fırına iletildi!");
+        alert("Siparişiniz alındı!");
         cart = [];
-        cartTotal = 0;
         updateCartUI();
-        renderCustomerProducts();
-        checkMyOrderStatus();
+        closeCartModal();
     }
 
     function checkMyOrderStatus() {
-        const myOrder = JSON.parse(localStorage.getItem('mt_my_last_order'));
+        const lastOrderId = localStorage.getItem('mt_last_order_id');
         const tracker = document.getElementById('customer-order-tracker');
-        if (!myOrder) return;
+        if (!lastOrderId) return;
 
-        const currentOrder = orders.find(o => o.id === myOrder.id);
+        const currentOrder = orders.find(o => o.id == lastOrderId);
+        if(!currentOrder) return;
+
         tracker.style.display = 'block';
-        document.getElementById('tracker-location').textContent = myOrder.location + " (" + myOrder.time + ")";
-        
-        const statusElem = document.getElementById('tracker-status');
-        if (currentOrder && currentOrder.status === 'COMPLETED') {
-            statusElem.textContent = "Siparişiniz Teslim Edildi!";
-            statusElem.className = "status-badge status-completed";
-        } else {
-            statusElem.textContent = "Hazırlanıyor / Yolda";
-            statusElem.className = "status-badge status-pending";
-        }
+        document.getElementById('tracker-location').textContent = currentOrder.location;
+        document.getElementById('tracker-time').textContent = currentOrder.time;
+
+        const steps = ['RECEIVED', 'PREPARING', 'ON_THE_WAY', 'DELIVERED'];
+        const currentIdx = steps.indexOf(currentOrder.status);
+
+        steps.forEach((st, idx) => {
+            const elem = document.getElementById('step-' + st);
+            if (idx <= currentIdx) elem.classList.add('active');
+            else elem.classList.remove('active');
+        });
     }
 
-    /* ADMİN PANELİ */
+    /* ADMİN */
     function loginAdmin() {
-        if (document.getElementById('admin-pass').value === "160703") {
+        if (document.getElementById('admin-pass').value === "160793") {
             isAdmin = true;
             document.getElementById('admin-login').style.display = 'none';
             document.getElementById('admin-content').style.display = 'block';
             renderAdminOrders();
             renderAdminProducts();
-        } else {
-            alert("Hatalı Şifre!");
-        }
+        } else alert("Hatalı Şifre!");
     }
 
     function renderAdminOrders() {
         const container = document.getElementById('orders-container');
-        if (orders.length === 0) {
-            container.innerHTML = '<p style="color: #718096;">Bekleyen sipariş yok.</p>';
-            return;
-        }
+        container.innerHTML = orders.length === 0 ? '<p style="color:var(--text-muted); font-size:12px;">Sipariş yok.</p>' : '';
 
-        container.innerHTML = '';
         orders.forEach(o => {
-            let itemsHtml = o.items.map(i => `<li>${i.name} (${i.price} TL)</li>`).join('');
-            let isDone = o.status === 'COMPLETED';
+            let itemsHtml = o.items.map(i => `<li>${i.name} (${i.qty} adet)</li>`).join('');
             container.innerHTML += `
-                <div class="order-card" style="${isDone ? 'border-left-color: #38a169; opacity: 0.7;' : ''}">
-                    <div class="order-header">
+                <div class="admin-card">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:12px;">
                         <span>${o.location}</span>
-                        <span>Saat: ${o.time}</span>
+                        <span>${o.time}</span>
                     </div>
-                    <ul style="margin-left: 20px; font-size: 14px;">${itemsHtml}</ul>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                        <strong>Toplam: ${o.total} TL</strong>
-                        ${!isDone ? `<button class="btn-complete" onclick="markOrderCompleted(${o.id})">Teslim Edildi Yap</button>` : '<b style="color:#38a169;">Teslim Edildi</b>'}
+                    <ul style="margin: 6px 0 6px 15px; font-size:11px; color:var(--text-muted);">${itemsHtml}</ul>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong style="color:var(--getir-purple);">${o.total} TL</strong>
+                        <select class="status-select" onchange="updateOrderStatus('${o.dbId}', this.value)">
+                            <option value="RECEIVED" ${o.status === 'RECEIVED' ? 'selected':''}>1. Alındı</option>
+                            <option value="PREPARING" ${o.status === 'PREPARING' ? 'selected':''}>2. Hazırlanıyor</option>
+                            <option value="ON_THE_WAY" ${o.status === 'ON_THE_WAY' ? 'selected':''}>3. Kuryede</option>
+                            <option value="DELIVERED" ${o.status === 'DELIVERED' ? 'selected':''}>4. Teslim Edildi</option>
+                        </select>
                     </div>
                 </div>
             `;
         });
     }
 
-    function markOrderCompleted(orderId) {
-        let order = orders.find(o => o.id === orderId);
-        if (order) {
-            order.status = 'COMPLETED';
-            localStorage.setItem('mt_orders', JSON.stringify(orders));
-            broadcast({ action: 'STATUS_UPDATE', orderId: orderId });
-            renderAdminOrders();
-            checkMyOrderStatus();
-        }
+    function updateOrderStatus(dbId, status) {
+        db.ref('orders/' + dbId).update({ status });
     }
 
     function renderAdminProducts() {
         const container = document.getElementById('admin-product-list');
-        container.innerHTML = '<h5>Mevcut Ürünler</h5>';
+        container.innerHTML = '';
         products.forEach(p => {
             container.innerHTML += `
-                <div class="admin-prod-item">
+                <div class="admin-card" style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <strong>${p.name}</strong> - ${p.price} TL
-                        <br><small style="color: #718096;">Stok: ${p.stock} | Max Limit: ${p.maxLimit}</small>
+                        <strong style="font-size:12px;">${p.name}</strong> [${p.category || 'Genel'}] - ${p.price} TL
+                        <div style="font-size:10px; color:var(--text-muted);">Stok: ${p.stock} | Max: ${p.maxLimit}</div>
                     </div>
-                    <button class="btn-delete" onclick="deleteProduct(${p.id})">Sil</button>
+                    <button class="btn-action" style="background:var(--danger); color:white; width:auto; padding:4px 8px; font-size:10px;" onclick="deleteProduct('${p.dbId}')">Sil</button>
                 </div>
             `;
         });
@@ -402,34 +491,22 @@
 
     function addNewProduct() {
         const name = document.getElementById('new-prod-name').value;
+        const category = document.getElementById('new-prod-cat').value;
         const price = parseFloat(document.getElementById('new-prod-price').value);
         const stock = parseInt(document.getElementById('new-prod-stock').value);
         const max = parseInt(document.getElementById('new-prod-max').value);
 
-        if (!name || isNaN(price) || isNaN(stock) || isNaN(max)) {
-            return alert("Lütfen tüm alanları doldurun!");
-        }
+        if (!name || isNaN(price) || isNaN(stock) || isNaN(max)) return alert("Tüm alanları doldurun!");
 
-        products.push({ id: Date.now(), name, price, stock, maxLimit: max });
-        localStorage.setItem('mt_products', JSON.stringify(products));
-        
-        broadcast({ action: 'PRODUCTS_UPDATED', products: products });
-
+        db.ref('products').push({ name, category, price, stock, maxLimit: max });
         document.getElementById('new-prod-name').value = '';
         document.getElementById('new-prod-price').value = '';
         document.getElementById('new-prod-stock').value = '';
         document.getElementById('new-prod-max').value = '';
-
-        renderAdminProducts();
-        renderCustomerProducts();
     }
 
-    function deleteProduct(id) {
-        products = products.filter(p => p.id !== id);
-        localStorage.setItem('mt_products', JSON.stringify(products));
-        broadcast({ action: 'PRODUCTS_UPDATED', products: products });
-        renderAdminProducts();
-        renderCustomerProducts();
+    function deleteProduct(dbId) {
+        db.ref('products/' + dbId).remove();
     }
 </script>
 
