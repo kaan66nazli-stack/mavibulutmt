@@ -5,131 +5,172 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kapında - Hızlı Sipariş</title>
     <style>
-        :root { --main-color: #ff4757; --accent: #2ed573; --bg: #f1f2f6; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: var(--bg); padding: 15px; padding-bottom: 50px; }
+        :root {
+            --primary: #5d3ebc;
+            --primary-dark: #4c3298;
+            --accent: #ffd300;
+            --success: #00b152;
+            --bg: #f5f6f9;
+            --card-bg: #ffffff;
+            --text: #191919;
+            --text-muted: #697488;
+        }
 
-        /* Yılbaşı Süslemeleri Banner */
-        .christmas-banner { display: none; background: #d63031; color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 14px; border-radius: 8px; margin-bottom: 10px; }
-
-        header { background: var(--main-color); color: white; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        header h1 { font-size: 24px; letter-spacing: 1px; }
-
-        /* Bildirimler / Kampanya Alanı */
-        .notifications-box { background: #fff3bf; border: 1px solid #ffe066; padding: 12px; border-radius: 10px; margin-bottom: 15px; }
-        .notifications-box h3 { color: #f59f00; font-size: 15px; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
-        .promo-tag { background: #e67e22; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 12px; }
-
-        /* Ürünler Grid */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; }
-        .card { background: white; padding: 12px; border-radius: 10px; text-align: center; border: 1px solid #e0e0e0; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
-        .card b { display: block; margin-bottom: 4px; font-size: 14px; }
-        .card .price { color: var(--main-color); font-weight: bold; font-size: 15px; }
-        .card button { background: var(--main-color); color: white; border: none; padding: 6px; border-radius: 6px; margin-top: 8px; width: 100%; font-weight: bold; cursor: pointer; }
-
-        /* Sepet Ve Form */
-        .cart-box { background: white; padding: 15px; border-radius: 12px; border: 1px solid #e0e0e0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        input { width: 100%; padding: 10px; margin: 5px 0 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         
-        .coupon-area { display: flex; gap: 5px; margin-bottom: 10px; }
-        .coupon-area input { margin: 0; }
-        .coupon-area button { background: #333; color: white; border: none; padding: 0 12px; border-radius: 6px; cursor: pointer; }
+        body { background: var(--bg); color: var(--text); padding-bottom: 40px; }
 
-        .order-btn { background: var(--accent); color: white; border: none; padding: 14px; border-radius: 8px; width: 100%; font-weight: bold; font-size: 16px; cursor: pointer; }
+        /* Üst Header */
+        header { background: var(--primary); color: white; padding: 18px 20px; text-align: center; box-shadow: 0 4px 12px rgba(93, 62, 188, 0.2); }
+        header h1 { font-size: 26px; font-weight: 800; letter-spacing: 0.5px; }
+        header p { font-size: 13px; opacity: 0.9; margin-top: 3px; }
+
+        /* Yılbaşı Banner */
+        .xmas-banner { display: none; background: #d63031; color: white; text-align: center; padding: 10px; font-weight: bold; font-size: 13px; }
+
+        .container { max-width: 600px; margin: 15px auto; padding: 0 12px; }
+
+        /* 1. BİLDİRİMLER ALANI (BAĞIMSIZ KART) */
+        .section-box { background: var(--card-bg); border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #eef0f4; }
+        
+        .notifications-card { background: #fff9db; border: 1px solid #ffe066; }
+        .notifications-card h3 { color: #f59f00; font-size: 15px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .promo-code { background: #f59f00; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+
+        /* 2. ÜRÜNLER ALANI */
+        .section-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; color: var(--text); }
+        
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        
+        .product-card { background: var(--card-bg); border-radius: 12px; padding: 14px; text-align: center; border: 1px solid #eef0f4; box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.1s; }
+        .product-card:active { transform: scale(0.98); }
+        .product-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+        .product-price { color: var(--primary); font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+        .product-btn { background: var(--primary); color: white; border: none; padding: 8px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; }
+
+        /* 3. SEPET VE SİPARİŞ ALANI (TAMAMEN AYRI KART) */
+        .cart-card { background: var(--card-bg); border-radius: 14px; padding: 18px; border: 2px solid var(--primary); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+        
+        .cart-item { display: flex; justify-content: space-between; font-size: 14px; padding: 8px 0; border-bottom: 1px border-dashed #eee; }
+        
+        .form-group { margin-top: 12px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
+        .form-group input { width: 100%; padding: 10px 12px; border: 1px solid #dcdfe6; border-radius: 8px; font-size: 14px; outline: none; }
+        .form-group input:focus { border-color: var(--primary); }
+
+        .coupon-group { display: flex; gap: 8px; }
+        .coupon-group input { margin-bottom: 0; }
+        .coupon-btn { background: #333; color: white; border: none; padding: 0 14px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+
+        .total-row { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; font-size: 18px; font-weight: 800; }
+
+        .order-btn { background: var(--success); color: white; border: none; padding: 14px; border-radius: 10px; width: 100%; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 177, 82, 0.25); }
     </style>
 </head>
 <body>
 
-<!-- Yılbaşı Otomatik Süsleme Alanı -->
-<div id="xmas-header" class="christmas-banner">
-    🎄 Mutlu Yıllar! Yılbaşı Özel İndirim Kodunu Kullanmayı Unutmayın! ❄️
+<div id="xmas-banner" class="xmas-banner">
+    🎄 Mutlu Yıllar! Yılbaşı İndirim Kodunu Kullanmayı Unutmayın! ❄️
 </div>
 
 <header>
     <h1>KAPINDA</h1>
-    <small>Siz İsteyin, Anında Kapınızda</small>
+    <p>Dakikalar İçinde Kapında</p>
 </header>
 
-<!-- Bildirimler / Kampanya Paneli -->
-<div class="notifications-box">
-    <h3>🔔 Bildirimler & Kampanyalar</h3>
-    <div id="promo-list">Yükleniyor...</div>
-</div>
+<div class="container">
 
-<h3>Ürünler</h3>
-<div class="grid" id="product-list">Yükleniyor...</div>
-
-<div class="cart-box">
-    <h3>Sepetim</h3>
-    <div id="cart-items" style="margin: 10px 0; font-size: 14px;">Sepetiniz boş.</div>
-    <hr style="margin: 10px 0;"><br>
-    
-    <!-- İndirim Kuponu Yeri -->
-    <label>İndirim Kuponu:</label>
-    <div class="coupon-area">
-        <input type="text" id="coupon-code" placeholder="Örn: GUNAYDIN">
-        <button onclick="applyCoupon()">Uygula</button>
+    <!-- BİLDİRİMLER / KAMPANYA ALANI -->
+    <div class="section-box notifications-card">
+        <h3>🔔 Bildirimler & Duyurular</h3>
+        <div id="promo-list" style="font-size: 13px;">Yükleniyor...</div>
     </div>
-    <div id="coupon-msg" style="font-size: 12px; margin-bottom: 10px;"></div>
 
-    <label>Ad Soyad / Daire No:</label>
-    <input type="text" id="cust-name" placeholder="Örn: Ahmet - Daire 4">
-    
-    <label>Adres Tarifi:</label>
-    <input type="text" id="cust-addr" placeholder="Örn: 2. Kat sağ daire">
+    <!-- ÜRÜNLER ALANI -->
+    <div class="section-title">Ürünler</div>
+    <div class="products-grid" id="product-list">
+        <!-- Sabit Ürünler -->
+        <div class="product-card">
+            <div>
+                <div class="product-title">Ekmek</div>
+                <div class="product-price">10 TL</div>
+            </div>
+            <button class="product-btn" onclick="addToCart('Ekmek', 10)">Ekle</button>
+        </div>
+        <div class="product-card">
+            <div>
+                <div class="product-title">Çikolata</div>
+                <div class="product-price">35 TL</div>
+            </div>
+            <button class="product-btn" onclick="addToCart('Çikolata', 35)">Ekle</button>
+        </div>
+        <div class="product-card">
+            <div>
+                <div class="product-title">Kurabiye</div>
+                <div class="product-price">45 TL</div>
+            </div>
+            <button class="product-btn" onclick="addToCart('Kurabiye', 45)">Ekle</button>
+        </div>
+    </div>
 
-    <button class="order-btn" onclick="sendOrder()">Siparişi Tamamla (<span id="total-price">0</span> TL)</button>
+    <!-- SEPET VE SİPARİŞ VERME ALANI (AYRI) -->
+    <div class="cart-card">
+        <div class="section-title" style="margin-bottom: 8px;">Sepetim</div>
+        <div id="cart-items" style="color: var(--text-muted); font-size: 13px;">Sepetiniz boş.</div>
+        
+        <div class="form-group" style="margin-top: 15px;">
+            <label>KAMPANYA KODU</label>
+            <div class="coupon-group">
+                <input type="text" id="coupon-code" placeholder="Örn: GUNAYDIN">
+                <button class="coupon-btn" onclick="applyCoupon()">Uygula</button>
+            </div>
+            <div id="coupon-msg" style="font-size: 12px; margin-top: 4px;"></div>
+        </div>
+
+        <div class="form-group">
+            <label>AD SOYAD / DARE NO</label>
+            <input type="text" id="cust-name" placeholder="Örn: Ahmet - Daire 4">
+        </div>
+
+        <div class="form-group">
+            <label>ADRES TARİFİ</label>
+            <input type="text" id="cust-addr" placeholder="Örn: 2. Kat sağ daire">
+        </div>
+
+        <div class="total-row">
+            <span>Toplam:</span>
+            <span style="color: var(--primary);"><span id="total-price">0</span> TL</span>
+        </div>
+
+        <button class="order-btn" onclick="sendOrder()">Siparişi Tamamla</button>
+    </div>
+
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbype8ZeKGKuppjSoO-_xp284Hh3bmv70et7QXnXNxPPm9yjzqTMZ9-kIQPOgNmZa4ed/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/library/d/17CgapLJYXt1zkIp_MtPLrSwBoUXJ916lJn1uhhTIzQTS1tCQYBxmZxDJ/1"; // Google Apps Script URL'ini Buraya Yapıştır
 
-    let products = [];
     let activeCoupons = [];
     let cart = [];
     let appliedDiscount = 0;
     let appliedCouponName = "";
 
-    // Tarih/Saat Kontrolleri ve Yılbaşı Modu
     function checkSeasonalEvents() {
-        const now = new Date();
-        const month = now.getMonth(); // 11 = Aralık, 0 = Ocak
-        const hour = now.getHours();
-
-        // Aralık veya Ocak ayındaysak Yılbaşı Süslerini Aç
+        const month = new Date().getMonth();
         if (month === 11 || month === 0) {
-            document.getElementById('xmas-header').style.display = 'block';
+            document.getElementById('xmas-banner').style.display = 'block';
         }
     }
 
-    async function loadData() {
+    async function loadNotifications() {
         try {
             const res = await fetch(SCRIPT_URL);
             const data = await res.json();
-            
-            products = data.urunler || [];
             activeCoupons = data.kampanyalar || [];
-
-            renderProducts();
             renderNotifications();
         } catch (e) {
-            document.getElementById('product-list').innerText = "Veri yüklenirken hata oluştu.";
+            renderNotifications();
         }
-    }
-
-    function renderProducts() {
-        const container = document.getElementById('product-list');
-        container.innerHTML = '';
-        products.forEach(p => {
-            container.innerHTML += `
-                <div class="card">
-                    <b>${p.name}</b>
-                    <div class="price">${p.price} TL</div>
-                    <small style="color:gray;">Stok: ${p.stock}</small>
-                    <button onclick="addToCart('${p.name}', ${p.price}, ${p.stock})">Ekle</button>
-                </div>
-            `;
-        });
     }
 
     function renderNotifications() {
@@ -137,29 +178,28 @@
         container.innerHTML = '';
         
         const hour = new Date().getHours();
-
-        // Sabah Kampanyası Duyurusu (06:00 - 11:00 arası)
         if (hour >= 6 && hour <= 11) {
-            container.innerHTML += `<p style="margin-bottom:5px;">☀️ <b>Günaydın Kampanyası!</b> Sabah siparişlerine özel indirim kodu: <span class="promo-tag">GUNAYDIN</span></p>`;
+            container.innerHTML += `<p style="margin-bottom:4px;">☀️ <b>Günaydın Kampanyası!</b> Kod: <span class="promo-code">GUNAYDIN</span> (%15 İndirim)</p>`;
         }
 
-        // Yılbaşı Dönemi Duyurusu (Aralık / Ocak)
         const month = new Date().getMonth();
         if (month === 11 || month === 0) {
-            container.innerHTML += `<p style="margin-bottom:5px;">🎄 <b>Yılbaşı Fırsatı!</b> Yılbaşına özel sepette indirim kodu: <span class="promo-tag">YILBASI</span></p>`;
+            container.innerHTML += `<p style="margin-bottom:4px;">🎄 <b>Yılbaşı Fırsatı!</b> Kod: <span class="promo-code">YILBASI</span> (%25 İndirim)</p>`;
         }
 
-        // E-Tablo'dan Gelen Özel Kuponlar Listesi
-        activeCoupons.forEach(c => {
-            container.innerHTML += `<p style="font-size:13px; color:#555;">• Kupon Kodu: <b>${c.kod}</b> (%${c.indirimOrani} İndirim)</p>`;
-        });
+        if(activeCoupons.length > 0) {
+            activeCoupons.forEach(c => {
+                container.innerHTML += `<p>• <b>${c.kod}</b> Koduyla %${c.indirimOrani} İndirim!</p>`;
+            });
+        } else if (hour < 6 || hour > 11) {
+            container.innerHTML = `<p>Aktif genel duyuru bulunmuyor. Özel kupon kodlarınızı aşağıya girebilirsiniz.</p>`;
+        }
     }
 
-    function addToCart(name, price, stock) {
+    function addToCart(name, price) {
         let item = cart.find(i => i.name === name);
         if (item) {
-            if (item.qty < stock) item.qty++;
-            else alert("Stok sınırına ulaştınız!");
+            item.qty++;
         } else {
             cart.push({ name, price, qty: 1 });
         }
@@ -172,7 +212,6 @@
 
         let found = activeCoupons.find(c => String(c.kod).toUpperCase() === inputCode);
 
-        // Kod tablo harici kodlarsa manuel eşleştir:
         if (!found) {
             if (inputCode === "GUNAYDIN") found = { kod: "GUNAYDIN", indirimOrani: 15 };
             if (inputCode === "YILBASI") found = { kod: "YILBASI", indirimOrani: 25 };
@@ -195,11 +234,17 @@
     function updateCart() {
         const container = document.getElementById('cart-items');
         let subtotal = 0;
-        container.innerHTML = '';
+        
+        if (cart.length === 0) {
+            container.innerHTML = 'Sepetiniz boş.';
+            document.getElementById('total-price').innerText = "0";
+            return;
+        }
 
+        container.innerHTML = '';
         cart.forEach(i => {
             subtotal += i.price * i.qty;
-            container.innerHTML += `<div>${i.name} x${i.qty} - ${i.price * i.qty} TL</div>`;
+            container.innerHTML += `<div class="cart-item"><span>${i.name} x${i.qty}</span><b>${i.price * i.qty} TL</b></div>`;
         });
 
         let grandTotal = subtotal;
@@ -227,7 +272,7 @@
             coupon: appliedCouponName ? appliedCouponName : "Kuponsuz"
         };
 
-        alert("Siparişiniz gönderiliyor...");
+        alert("Siparişiniz alınıyor...");
 
         await fetch(SCRIPT_URL, {
             method: 'POST',
@@ -236,14 +281,18 @@
             body: JSON.stringify(orderData)
         });
 
-        alert("Siparişiniz alındı!");
+        alert("Siparişiniz Başarıyla Alındı!");
         cart = [];
         appliedDiscount = 0;
+        document.getElementById('cust-name').value = '';
+        document.getElementById('cust-addr').value = '';
+        document.getElementById('coupon-code').value = '';
+        document.getElementById('coupon-msg').innerText = '';
         updateCart();
     }
 
     checkSeasonalEvents();
-    loadData();
+    loadNotifications();
 </script>
 
 </body>
