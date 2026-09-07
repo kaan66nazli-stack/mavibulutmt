@@ -2,364 +2,130 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>götür - Metropol Express</title>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GetirFırın - Sipariş</title>
     <style>
-        :root {
-            --getir-purple: #5d3ebc;
-            --getir-yellow: #ffd300;
-            --bg-gray: #f2f3f7;
-            --card-bg: #ffffff;
-            --text-dark: #191919;
-            --text-muted: #697488;
-            --danger: #f00056;
-            --success: #00b152;
-            --border: #e2e8f0;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-gray); color: var(--text-dark); padding-bottom: 110px; }
-
-        /* Header */
-        header { background: var(--getir-purple); padding: 16px 20px; color: white; box-shadow: 0 4px 15px rgba(93, 62, 188, 0.2); }
-        .header-content { max-width: 900px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-        .brand-logo { font-size: 24px; font-weight: 900; color: var(--getir-yellow); letter-spacing: -0.5px; }
-
-        /* Ana Konteyner */
-        .wrapper { max-width: 900px; margin: 0 auto; padding: 12px; }
-
-        /* Konum ve Arama */
-        .top-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-        @media (max-width: 500px) { .top-controls { grid-template-columns: 1fr; } }
-        
-        .location-bar { background: white; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--border); display: flex; gap: 8px; }
-        .location-bar select { flex: 1; border: none; background: transparent; font-weight: 700; font-size: 13px; color: var(--text-dark); outline: none; cursor: pointer; }
-        
-        .search-bar input { width: 100%; background: white; border: 1px solid var(--border); padding: 10px 14px; border-radius: 12px; font-size: 13px; outline: none; }
-
-        /* Kategoriler (Yatay Kaydırma) */
-        .categories-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; scrollbar-width: none; }
-        .categories-scroll::-webkit-scrollbar { display: none; }
-        .cat-chip { background: white; border: 1px solid var(--border); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; color: var(--text-muted); transition: 0.2s; }
-        .cat-chip.active { background: var(--getir-yellow); color: var(--getir-purple); border-color: var(--getir-yellow); }
-
-        /* Canlı Takip Kartı */
-        .tracker-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); border: 1px solid var(--border); }
-        .tracker-steps { display: flex; justify-content: space-between; margin-top: 12px; }
-        .step-dot { font-size: 11px; font-weight: 800; color: var(--text-muted); text-align: center; flex: 1; opacity: 0.4; }
-        .step-dot.active { color: var(--getir-purple); opacity: 1; }
-
-        /* Esnek Ürün Grid (Boşluk Kalmayacak Şekilde Doldurur) */
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-        .product-card { background: white; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; position: relative; border: 1px solid var(--border); min-height: 120px; }
-        .product-price { font-size: 16px; font-weight: 900; color: var(--getir-purple); }
-        .product-name { font-weight: 700; font-size: 13px; margin: 6px 0; color: var(--text-dark); line-height: 1.3; }
-        .product-info-tag { font-size: 11px; color: var(--text-muted); font-weight: 600; }
-        
-        .btn-add-item { background: white; border: 1px solid var(--border); color: var(--getir-purple); width: 34px; height: 34px; border-radius: 10px; font-weight: 900; font-size: 20px; cursor: pointer; position: absolute; right: 10px; top: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); transition: 0.1s; }
-        .btn-add-item:active { transform: scale(0.92); }
-
-        /* Alt Sepet BARI */
-        .bottom-cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 14px 20px; border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -4px 25px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; z-index: 99; max-width: 900px; margin: 0 auto; }
-        .cart-price { font-size: 18px; font-weight: 900; color: var(--getir-purple); }
-        .btn-checkout { background: var(--getir-yellow); color: var(--getir-purple); border: none; padding: 12px 24px; border-radius: 12px; font-weight: 900; font-size: 14px; cursor: pointer; }
-
-        /* Modal (Sepet İnceleme) */
-        .modal { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: flex-end; justify-content: center; }
-        .modal-content { background: white; width: 100%; max-width: 600px; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 20px; max-height: 80vh; overflow-y: auto; }
-        .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
-        .qty-btn { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border); background: white; font-weight: bold; cursor: pointer; }
+        :root { --purple: #5d3ebc; --yellow: #ffd300; --bg: #f4f5f7; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background: var(--bg); padding: 15px; }
+        header { background: var(--purple); color: white; padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 15px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .card { background: white; padding: 12px; border-radius: 8px; border: 1px solid #ddd; text-align: center; }
+        .card button { background: var(--purple); color: white; border: none; padding: 6px 12px; border-radius: 5px; margin-top: 8px; cursor: pointer; width: 100%; }
+        .cart-box { background: white; padding: 15px; border-radius: 10px; border: 1px solid #ddd; }
+        input { width: 100%; padding: 8px; margin: 5px 0 10px; border: 1px solid #ccc; border-radius: 5px; }
+        .order-btn { background: #00b152; color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="header-content">
-        <div class="brand-logo">getir<span style="color:white;">fırın</span></div>
-    </div>
+    <h2>GetirFırın Sipariş</h2>
 </header>
 
-<div class="wrapper">
-    <div class="top-controls">
-        <div class="location-bar">
-            <select id="block-select">
-                <option value="D Blok">D Blok</option>
-                <option value="E Blok">E Blok</option>
-                <option value="F Blok">F Blok</option>
-                <option value="G Blok">G Blok</option>
-            </select>
-            <select id="unit-select"></select>
-        </div>
-        <div class="search-bar">
-            <input type="text" id="search-input" placeholder="Ürün ara..." oninput="filterProducts()">
-        </div>
-    </div>
+<h3>Ürünler</h3>
+<div class="grid" id="product-list">Yükleniyor...</div>
 
-    <!-- KATEGORİ SEÇİCİ -->
-    <div class="categories-scroll">
-        <div class="cat-chip active" onclick="filterCategory('Tümü', this)">Tümü</div>
-        <div class="cat-chip" onclick="filterCategory('Fırın', this)">🥐 Fırın</div>
-        <div class="cat-chip" onclick="filterCategory('İçecek', this)">🥤 İçecek</div>
-        <div class="cat-chip" onclick="filterCategory('Atıştırmalık', this)">🍫 Atıştırmalık</div>
-        <div class="cat-chip" onclick="filterCategory('Temel Gıda', this)">🧀 Temel Gıda</div>
-    </div>
+<div class="cart-box">
+    <h3>Sepetim</h3>
+    <div id="cart-items" style="margin: 10px 0; font-size: 14px;">Sepetiniz boş.</div>
+    <hr style="margin: 10px 0;"><br>
+    
+    <label>Ad Soyad / Daire No:</label>
+    <input type="text" id="cust-name" placeholder="Örn: Ahmet - Daire 4">
+    
+    <label>Adres Tarifi:</label>
+    <input type="text" id="cust-addr" placeholder="Örn: 2. Kat sağ daire">
 
-    <!-- Canlı Sipariş Takip Rozeti -->
-    <div id="customer-order-tracker" style="display: none;" class="tracker-card">
-        <div style="font-size: 14px; font-weight: 800; color: var(--getir-purple); display: flex; justify-content: space-between;">
-            <span>Sipariş Durumu</span>
-            <span id="tracker-time" style="font-size:12px; color:var(--text-muted);"></span>
-        </div>
-        <p id="tracker-location" style="font-size: 12px; color: var(--text-muted); margin-top: 2px;"></p>
-        
-        <div class="tracker-steps">
-            <div id="step-RECEIVED" class="step-dot">1. Alındı</div>
-            <div id="step-PREPARING" class="step-dot">2. Hazırlanıyor</div>
-            <div id="step-ON_THE_WAY" class="step-dot">3. Kuryede</div>
-            <div id="step-DELIVERED" class="step-dot">4. Teslim Edildi</div>
-        </div>
-    </div>
-
-    <!-- ÜRÜN LİSTESİ -->
-    <div id="customer-product-list" class="product-grid"></div>
-</div>
-
-<!-- ALT SEPET BARI -->
-<div id="cart-bar" class="bottom-cart-bar">
-    <div>
-        <div class="cart-price"><span id="cart-total">0.00</span> TL</div>
-        <div style="font-size:11px; color:var(--text-muted);" id="cart-count-text">0 Ürün</div>
-    </div>
-    <button class="btn-checkout" onclick="openCartModal()">Sepeti İncele</button>
-</div>
-
-<!-- SEPET MODAL (POPUP) -->
-<div id="cart-modal" class="modal">
-    <div class="modal-content">
-        <h3 style="margin-bottom: 12px; font-size:16px;">Sepet Detayı</h3>
-        <div id="modal-cart-items"></div>
-        <div style="margin-top: 15px; font-size:12px; color:var(--text-muted);">
-            <div>Ürünler Toplamı: <b id="sub-total">0.00</b> TL</div>
-            <div>Getirme Ücreti: <b>15.00 TL</b></div>
-            <hr style="margin: 8px 0; border:none; border-top:1px solid var(--border);">
-            <div style="font-size:15px; color:var(--text-dark);">Toplam: <b id="grand-total" style="color:var(--getir-purple);">0.00</b> TL</div>
-        </div>
-        <div style="display:flex; gap:10px; margin-top:15px;">
-            <button class="btn-action" style="background:var(--bg-gray); border:none; padding:12px; border-radius:8px; flex:1; font-weight:bold; cursor:pointer;" onclick="closeCartModal()">Kapat</button>
-            <button class="btn-action" style="background:var(--getir-purple); color:white; border:none; padding:12px; border-radius:8px; flex:2; font-weight:bold; cursor:pointer;" onclick="sendOrder()">Siparişi Onayla</button>
-        </div>
-    </div>
+    <button class="order-btn" onclick="sendOrder()">Siparişi Tamamla (<span id="total-price">0</span> TL)</button>
 </div>
 
 <script>
-    // FIREBASE YAPILANDIRMASI
-    const firebaseConfig = {
-        apiKey: "SENIN_API_KEY",
-        authDomain: "SENIN_PROJECT_ID.firebaseapp.com",
-        databaseURL: "https://SENIN_PROJECT_ID-default-rtdb.firebaseio.com",
-        projectId: "SENIN_PROJECT_ID",
-        storageBucket: "SENIN_PROJECT_ID.appspot.com",
-        messagingSenderId: "123456789",
-        appId: "1:123456789:web:abcdef"
-    };
+    // GOOGLE APPS SCRIPT'TEN ALDIĞIN LINKI BURAYA YAPIŞTIR
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbype8ZeKGKuppjSoO-_xp284Hh3bmv70et7QXnXNxPPm9yjzqTMZ9-kIQPOgNmZa4ed/exec";
 
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    let products = [];
+    let cart = [];
 
-    let products = [], orders = [], cart = [], selectedCategory = 'Tümü';
+    // ÜRÜNLERİ GOOGLE SHEETS'TEN ÇEK
+    async function loadProducts() {
+        try {
+            const res = await fetch(SCRIPT_URL);
+            products = await res.json();
+            const container = document.getElementById('product-list');
+            container.innerHTML = '';
 
-    // Daire Listesi
-    const unitSelect = document.getElementById('unit-select');
-    for (let i = 1; i <= 11; i++) {
-        let opt = document.createElement('option');
-        opt.value = "Daire " + i; opt.textContent = "Daire " + i;
-        unitSelect.appendChild(opt);
-    }
-
-    // FIREBASE DİNLENİYOR
-    db.ref('products').on('value', snapshot => {
-        const data = snapshot.val();
-        products = data ? Object.keys(data).map(key => ({ dbId: key, ...data[key] })) : [];
-        filterProducts();
-    });
-
-    db.ref('orders').on('value', snapshot => {
-        const data = snapshot.val();
-        orders = data ? Object.keys(data).map(key => ({ dbId: key, ...data[key] })) : [];
-        checkMyOrderStatus();
-    });
-
-    function filterCategory(cat, elem) {
-        selectedCategory = cat;
-        document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
-        elem.classList.add('active');
-        filterProducts();
-    }
-
-    function filterProducts() {
-        const query = document.getElementById('search-input').value.toLowerCase();
-        const filtered = products.filter(p => {
-            const matchCat = selectedCategory === 'Tümü' || p.category === selectedCategory;
-            const matchName = p.name.toLowerCase().includes(query);
-            return matchCat && matchName;
-        });
-        renderCustomerProducts(filtered);
-    }
-
-    function renderCustomerProducts(items) {
-        const container = document.getElementById('customer-product-list');
-        container.innerHTML = '';
-        if(items.length === 0) {
-            container.innerHTML = '<p style="color:var(--text-muted); font-size:13px; grid-column: 1 / -1; text-align:center; padding: 20px 0;">Ürün bulunamadı.</p>';
-            return;
-        }
-        items.forEach(p => {
-            container.innerHTML += `
-                <div class="product-card">
-                    <button class="btn-add-item" ${p.stock <= 0 ? 'disabled' : ''} onclick="addToCart('${p.dbId}')">+</button>
-                    <div>
-                        <div class="product-price">${p.price} TL</div>
-                        <div class="product-name">${p.name}</div>
-                        <div class="product-info-tag">Stok: ${p.stock}</div>
+            products.forEach(p => {
+                container.innerHTML += `
+                    <div class="card">
+                        <b>${p.name}</b><br>
+                        <small>${p.price} TL</small><br>
+                        <small style="color:gray;">Stok: ${p.stock}</small><br>
+                        <button onclick="addToCart('${p.name}', ${p.price}, ${p.stock})">Ekle</button>
                     </div>
-                </div>
-            `;
-        });
+                `;
+            });
+        } catch (e) {
+            document.getElementById('product-list').innerText = "Ürünler yüklenirken hata oluştu.";
+        }
     }
 
-    function addToCart(dbId) {
-        const prod = products.find(p => p.dbId === dbId);
-        const inCart = cart.find(c => c.dbId === dbId);
-        const currentQty = inCart ? inCart.qty : 0;
-
-        if (currentQty >= prod.maxLimit || currentQty >= prod.stock) {
-            alert("Maksimum alım sınırına veya stok limitine ulaştınız.");
-            return;
-        }
-
-        if (inCart) {
-            inCart.qty++;
+    function addToCart(name, price, stock) {
+        let item = cart.find(i => i.name === name);
+        if (item) {
+            if (item.qty < stock) item.qty++;
+            else alert("Stok sınırına ulaştınız!");
         } else {
-            cart.push({ ...prod, qty: 1 });
+            cart.push({ name, price, qty: 1 });
         }
-        updateCartUI();
+        updateCart();
     }
 
-    function updateCartUI() {
-        let total = 0, count = 0;
-        cart.forEach(item => {
-            total += item.price * item.qty;
-            count += item.qty;
-        });
-        document.getElementById('cart-total').textContent = total.toFixed(2);
-        document.getElementById('cart-count-text').textContent = count + " Ürün";
-    }
-
-    function openCartModal() {
-        if (cart.length === 0) return alert("Sepetiniz boş!");
-        const container = document.getElementById('modal-cart-items');
+    function updateCart() {
+        const container = document.getElementById('cart-items');
+        let total = 0;
         container.innerHTML = '';
-        let subtotal = 0;
 
-        cart.forEach(item => {
-            let itemTotal = item.price * item.qty;
-            subtotal += itemTotal;
-            container.innerHTML += `
-                <div class="cart-item-row">
-                    <div>
-                        <div style="font-weight:bold; font-size:13px;">${item.name}</div>
-                        <div style="font-size:11px; color:var(--text-muted);">${item.price} TL x ${item.qty}</div>
-                    </div>
-                    <div>
-                        <button class="qty-btn" onclick="changeQty('${item.dbId}', -1)">-</button>
-                        <span style="margin: 0 8px; font-weight:bold; font-size:13px;">${item.qty}</span>
-                        <button class="qty-btn" onclick="changeQty('${item.dbId}', 1)">+</button>
-                    </div>
-                </div>
-            `;
+        cart.forEach(i => {
+            total += i.price * i.qty;
+            container.innerHTML += `<div>${i.name} x${i.qty} - ${i.price * i.qty} TL</div>`;
         });
 
-        document.getElementById('sub-total').textContent = subtotal.toFixed(2);
-        document.getElementById('grand-total').textContent = (subtotal + 15).toFixed(2);
-        document.getElementById('cart-modal').style.display = 'flex';
+        document.getElementById('total-price').innerText = total;
     }
 
-    function changeQty(dbId, delta) {
-        const item = cart.find(c => c.dbId === dbId);
-        if (!item) return;
-        const prod = products.find(p => p.dbId === dbId);
+    // SİPARİŞİ GOOGLE SHEETS'E GÖNDER
+    async function sendOrder() {
+        const name = document.getElementById('cust-name').value;
+        const address = document.getElementById('cust-addr').value;
+        const total = document.getElementById('total-price').innerText;
 
-        if (delta > 0 && (item.qty >= prod.maxLimit || item.qty >= prod.stock)) {
-            return alert("Limit aşıldı.");
-        }
+        if (!name || cart.length === 0) return alert("Lütfen sepeti doldurun ve adınızı yazın.");
 
-        item.qty += delta;
-        if (item.qty <= 0) {
-            cart = cart.filter(c => c.dbId !== dbId);
-        }
-        updateCartUI();
-        if (cart.length === 0) closeCartModal();
-        else openCartModal();
-    }
-
-    function closeCartModal() {
-        document.getElementById('cart-modal').style.display = 'none';
-    }
-
-    function sendOrder() {
-        const block = document.getElementById('block-select').value;
-        const unit = document.getElementById('unit-select').value;
-        let subtotal = 0;
-        cart.forEach(i => subtotal += i.price * i.qty);
+        const itemsStr = cart.map(i => `${i.name} (${i.qty} adet)`).join(', ');
 
         const orderData = {
-            id: Date.now(),
-            location: `${block} - ${unit}`,
-            items: cart,
-            total: subtotal + 15,
-            status: 'RECEIVED',
-            time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+            name: name,
+            address: address,
+            items: itemsStr,
+            total: total
         };
 
-        // Stok Düşme
-        cart.forEach(cItem => {
-            const p = products.find(prod => prod.dbId === cItem.dbId);
-            if (p) db.ref('products/' + p.dbId).update({ stock: p.stock - cItem.qty });
-        });
+        alert("Siparişiniz gönderiliyor...");
 
-        db.ref('orders').push(orderData);
-        localStorage.setItem('mt_last_order_id', orderData.id);
+        await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        });
 
         alert("Siparişiniz alındı!");
         cart = [];
-        updateCartUI();
-        closeCartModal();
+        updateCart();
     }
 
-    function checkMyOrderStatus() {
-        const lastOrderId = localStorage.getItem('mt_last_order_id');
-        const tracker = document.getElementById('customer-order-tracker');
-        if (!lastOrderId) return;
-
-        const currentOrder = orders.find(o => o.id == lastOrderId);
-        if(!currentOrder) return;
-
-        tracker.style.display = 'block';
-        document.getElementById('tracker-location').textContent = currentOrder.location;
-        document.getElementById('tracker-time').textContent = currentOrder.time;
-
-        const steps = ['RECEIVED', 'PREPARING', 'ON_THE_WAY', 'DELIVERED'];
-        const currentIdx = steps.indexOf(currentOrder.status);
-
-        steps.forEach((st, idx) => {
-            const elem = document.getElementById('step-' + st);
-            if (idx <= currentIdx) elem.classList.add('active');
-            else elem.classList.remove('active');
-        });
-    }
+    loadProducts();
 </script>
 
 </body>
