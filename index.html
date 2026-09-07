@@ -3,25 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GetirFırın - Sipariş</title>
+    <title>Kapında - Hızlı Sipariş</title>
     <style>
-        :root { --purple: #5d3ebc; --yellow: #ffd300; --bg: #f4f5f7; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        body { background: var(--bg); padding: 15px; }
-        header { background: var(--purple); color: white; padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 15px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
-        .card { background: white; padding: 12px; border-radius: 8px; border: 1px solid #ddd; text-align: center; }
-        .card button { background: var(--purple); color: white; border: none; padding: 6px 12px; border-radius: 5px; margin-top: 8px; cursor: pointer; width: 100%; }
-        .cart-box { background: white; padding: 15px; border-radius: 10px; border: 1px solid #ddd; }
-        input { width: 100%; padding: 8px; margin: 5px 0 10px; border: 1px solid #ccc; border-radius: 5px; }
-        .order-btn { background: #00b152; color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; }
+        :root { --main-color: #ff4757; --accent: #2ed573; --bg: #f1f2f6; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: var(--bg); padding: 15px; padding-bottom: 50px; }
+
+        /* Yılbaşı Süslemeleri Banner */
+        .christmas-banner { display: none; background: #d63031; color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 14px; border-radius: 8px; margin-bottom: 10px; }
+
+        header { background: var(--main-color); color: white; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        header h1 { font-size: 24px; letter-spacing: 1px; }
+
+        /* Bildirimler / Kampanya Alanı */
+        .notifications-box { background: #fff3bf; border: 1px solid #ffe066; padding: 12px; border-radius: 10px; margin-bottom: 15px; }
+        .notifications-box h3 { color: #f59f00; font-size: 15px; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+        .promo-tag { background: #e67e22; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+
+        /* Ürünler Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .card { background: white; padding: 12px; border-radius: 10px; text-align: center; border: 1px solid #e0e0e0; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+        .card b { display: block; margin-bottom: 4px; font-size: 14px; }
+        .card .price { color: var(--main-color); font-weight: bold; font-size: 15px; }
+        .card button { background: var(--main-color); color: white; border: none; padding: 6px; border-radius: 6px; margin-top: 8px; width: 100%; font-weight: bold; cursor: pointer; }
+
+        /* Sepet Ve Form */
+        .cart-box { background: white; padding: 15px; border-radius: 12px; border: 1px solid #e0e0e0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        input { width: 100%; padding: 10px; margin: 5px 0 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+        
+        .coupon-area { display: flex; gap: 5px; margin-bottom: 10px; }
+        .coupon-area input { margin: 0; }
+        .coupon-area button { background: #333; color: white; border: none; padding: 0 12px; border-radius: 6px; cursor: pointer; }
+
+        .order-btn { background: var(--accent); color: white; border: none; padding: 14px; border-radius: 8px; width: 100%; font-weight: bold; font-size: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
 
+<!-- Yılbaşı Otomatik Süsleme Alanı -->
+<div id="xmas-header" class="christmas-banner">
+    🎄 Mutlu Yıllar! Yılbaşı Özel İndirim Kodunu Kullanmayı Unutmayın! ❄️
+</div>
+
 <header>
-    <h2>GetirFırın Sipariş</h2>
+    <h1>KAPINDA</h1>
+    <small>Siz İsteyin, Anında Kapınızda</small>
 </header>
+
+<!-- Bildirimler / Kampanya Paneli -->
+<div class="notifications-box">
+    <h3>🔔 Bildirimler & Kampanyalar</h3>
+    <div id="promo-list">Yükleniyor...</div>
+</div>
 
 <h3>Ürünler</h3>
 <div class="grid" id="product-list">Yükleniyor...</div>
@@ -31,6 +64,14 @@
     <div id="cart-items" style="margin: 10px 0; font-size: 14px;">Sepetiniz boş.</div>
     <hr style="margin: 10px 0;"><br>
     
+    <!-- İndirim Kuponu Yeri -->
+    <label>İndirim Kuponu:</label>
+    <div class="coupon-area">
+        <input type="text" id="coupon-code" placeholder="Örn: GUNAYDIN">
+        <button onclick="applyCoupon()">Uygula</button>
+    </div>
+    <div id="coupon-msg" style="font-size: 12px; margin-bottom: 10px;"></div>
+
     <label>Ad Soyad / Daire No:</label>
     <input type="text" id="cust-name" placeholder="Örn: Ahmet - Daire 4">
     
@@ -41,33 +82,77 @@
 </div>
 
 <script>
-    // GOOGLE APPS SCRIPT'TEN ALDIĞIN LINKI BURAYA YAPIŞTIR
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbype8ZeKGKuppjSoO-_xp284Hh3bmv70et7QXnXNxPPm9yjzqTMZ9-kIQPOgNmZa4ed/exec";
+    const SCRIPT_URL = "KOPYALADIGIN_WEB_APP_URL";
 
     let products = [];
+    let activeCoupons = [];
     let cart = [];
+    let appliedDiscount = 0;
+    let appliedCouponName = "";
 
-    // ÜRÜNLERİ GOOGLE SHEETS'TEN ÇEK
-    async function loadProducts() {
+    // Tarih/Saat Kontrolleri ve Yılbaşı Modu
+    function checkSeasonalEvents() {
+        const now = new Date();
+        const month = now.getMonth(); // 11 = Aralık, 0 = Ocak
+        const hour = now.getHours();
+
+        // Aralık veya Ocak ayındaysak Yılbaşı Süslerini Aç
+        if (month === 11 || month === 0) {
+            document.getElementById('xmas-header').style.display = 'block';
+        }
+    }
+
+    async function loadData() {
         try {
             const res = await fetch(SCRIPT_URL);
-            products = await res.json();
-            const container = document.getElementById('product-list');
-            container.innerHTML = '';
+            const data = await res.json();
+            
+            products = data.urunler || [];
+            activeCoupons = data.kampanyalar || [];
 
-            products.forEach(p => {
-                container.innerHTML += `
-                    <div class="card">
-                        <b>${p.name}</b><br>
-                        <small>${p.price} TL</small><br>
-                        <small style="color:gray;">Stok: ${p.stock}</small><br>
-                        <button onclick="addToCart('${p.name}', ${p.price}, ${p.stock})">Ekle</button>
-                    </div>
-                `;
-            });
+            renderProducts();
+            renderNotifications();
         } catch (e) {
-            document.getElementById('product-list').innerText = "Ürünler yüklenirken hata oluştu.";
+            document.getElementById('product-list').innerText = "Veri yüklenirken hata oluştu.";
         }
+    }
+
+    function renderProducts() {
+        const container = document.getElementById('product-list');
+        container.innerHTML = '';
+        products.forEach(p => {
+            container.innerHTML += `
+                <div class="card">
+                    <b>${p.name}</b>
+                    <div class="price">${p.price} TL</div>
+                    <small style="color:gray;">Stok: ${p.stock}</small>
+                    <button onclick="addToCart('${p.name}', ${p.price}, ${p.stock})">Ekle</button>
+                </div>
+            `;
+        });
+    }
+
+    function renderNotifications() {
+        const container = document.getElementById('promo-list');
+        container.innerHTML = '';
+        
+        const hour = new Date().getHours();
+
+        // Sabah Kampanyası Duyurusu (06:00 - 11:00 arası)
+        if (hour >= 6 && hour <= 11) {
+            container.innerHTML += `<p style="margin-bottom:5px;">☀️ <b>Günaydın Kampanyası!</b> Sabah siparişlerine özel indirim kodu: <span class="promo-tag">GUNAYDIN</span></p>`;
+        }
+
+        // Yılbaşı Dönemi Duyurusu (Aralık / Ocak)
+        const month = new Date().getMonth();
+        if (month === 11 || month === 0) {
+            container.innerHTML += `<p style="margin-bottom:5px;">🎄 <b>Yılbaşı Fırsatı!</b> Yılbaşına özel sepette indirim kodu: <span class="promo-tag">YILBASI</span></p>`;
+        }
+
+        // E-Tablo'dan Gelen Özel Kuponlar Listesi
+        activeCoupons.forEach(c => {
+            container.innerHTML += `<p style="font-size:13px; color:#555;">• Kupon Kodu: <b>${c.kod}</b> (%${c.indirimOrani} İndirim)</p>`;
+        });
     }
 
     function addToCart(name, price, stock) {
@@ -81,20 +166,50 @@
         updateCart();
     }
 
+    function applyCoupon() {
+        const inputCode = document.getElementById('coupon-code').value.trim().toUpperCase();
+        const msg = document.getElementById('coupon-msg');
+
+        let found = activeCoupons.find(c => String(c.kod).toUpperCase() === inputCode);
+
+        // Kod tablo harici kodlarsa manuel eşleştir:
+        if (!found) {
+            if (inputCode === "GUNAYDIN") found = { kod: "GUNAYDIN", indirimOrani: 15 };
+            if (inputCode === "YILBASI") found = { kod: "YILBASI", indirimOrani: 25 };
+        }
+
+        if (found) {
+            appliedDiscount = parseFloat(found.indirimOrani);
+            appliedCouponName = found.kod;
+            msg.style.color = "green";
+            msg.innerText = `%${appliedDiscount} indirim uygulandı!`;
+        } else {
+            appliedDiscount = 0;
+            appliedCouponName = "";
+            msg.style.color = "red";
+            msg.innerText = "Geçersiz kupon kodu.";
+        }
+        updateCart();
+    }
+
     function updateCart() {
         const container = document.getElementById('cart-items');
-        let total = 0;
+        let subtotal = 0;
         container.innerHTML = '';
 
         cart.forEach(i => {
-            total += i.price * i.qty;
+            subtotal += i.price * i.qty;
             container.innerHTML += `<div>${i.name} x${i.qty} - ${i.price * i.qty} TL</div>`;
         });
 
-        document.getElementById('total-price').innerText = total;
+        let grandTotal = subtotal;
+        if (appliedDiscount > 0) {
+            grandTotal = subtotal - (subtotal * (appliedDiscount / 100));
+        }
+
+        document.getElementById('total-price').innerText = grandTotal.toFixed(2);
     }
 
-    // SİPARİŞİ GOOGLE SHEETS'E GÖNDER
     async function sendOrder() {
         const name = document.getElementById('cust-name').value;
         const address = document.getElementById('cust-addr').value;
@@ -108,7 +223,8 @@
             name: name,
             address: address,
             items: itemsStr,
-            total: total
+            total: total + " TL",
+            coupon: appliedCouponName ? appliedCouponName : "Kuponsuz"
         };
 
         alert("Siparişiniz gönderiliyor...");
@@ -122,10 +238,12 @@
 
         alert("Siparişiniz alındı!");
         cart = [];
+        appliedDiscount = 0;
         updateCart();
     }
 
-    loadProducts();
+    checkSeasonalEvents();
+    loadData();
 </script>
 
 </body>
